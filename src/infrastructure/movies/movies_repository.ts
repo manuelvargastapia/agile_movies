@@ -1,6 +1,9 @@
+import { Actor } from '../../domain/movies/actor';
 import {
+    MovieBannerUrl,
     MovieCoverUrl,
     MovieId,
+    MovieOverview,
     MovieTitle,
     Token,
 } from '../../domain/core/value_objects';
@@ -12,15 +15,25 @@ import {
 import { NowPlayingMovie } from '../../domain/movies/now_playing';
 import { PopularMovie } from '../../domain/movies/popular';
 import { axiosInstance } from '../core/axios_instance';
+import { IMovie } from '../../domain/movies/i_movie';
 
-export async function getNowPlayingMovies(
+export enum MovieAPI {
+    NOW_PLAYING,
+    POPULAR,
+}
+
+export async function getMovies(
     token: Token,
     pageNumber: number,
-): Promise<MovieFailure | NowPlayingMovie[]> {
+    movieAPI: MovieAPI,
+): Promise<MovieFailure | IMovie[]> {
     try {
+        const apiUrl =
+            movieAPI === MovieAPI.NOW_PLAYING ? '/now_playing' : 'popular';
+
         const { status, data } = await axiosInstance({
             method: 'GET',
-            url: '/api/movies/now_playing',
+            url: `/api/movies/${apiUrl}`,
             params: {
                 page: pageNumber,
             },
@@ -30,16 +43,33 @@ export async function getNowPlayingMovies(
         });
 
         if (status === 200) {
-            const movies: NowPlayingMovie[] = [];
+            const movies: IMovie[] = [];
 
             data.data.forEach((rawMovie: any) => {
                 movies.push(
-                    new NowPlayingMovie(
-                        new MovieId(rawMovie.id),
-                        new MovieCoverUrl(
-                            `${rawMovie.imageBaseUrl}${rawMovie.backdrop_path}`,
-                        ),
-                    ),
+                    movieAPI === MovieAPI.NOW_PLAYING
+                        ? new NowPlayingMovie(
+                              new MovieId(rawMovie.id),
+                              new MovieCoverUrl(
+                                  `${rawMovie.imageBaseUrl}${rawMovie.backdrop_path}`,
+                              ),
+                              new MovieBannerUrl(
+                                  `${rawMovie.imageBaseUrl}${rawMovie.poster_path}`,
+                              ),
+                              new MovieTitle(rawMovie.title),
+                              new MovieOverview(rawMovie.overview),
+                          )
+                        : new PopularMovie(
+                              new MovieId(rawMovie.id),
+                              new MovieCoverUrl(
+                                  `${rawMovie.imageBaseUrl}${rawMovie.backdrop_path}`,
+                              ),
+                              new MovieBannerUrl(
+                                  `${rawMovie.imageBaseUrl}${rawMovie.poster_path}`,
+                              ),
+                              new MovieTitle(rawMovie.title),
+                              new MovieOverview(rawMovie.overview),
+                          ),
                 );
             });
 
@@ -59,38 +89,29 @@ export async function getNowPlayingMovies(
     }
 }
 
-export async function getPopularMovies(
-    token: Token,
-    pageNumber: number,
-): Promise<MovieFailure | PopularMovie[]> {
+export async function getMovieActors(token: Token, movieId: MovieId) {
     try {
         const { status, data } = await axiosInstance({
             method: 'GET',
-            url: '/api/movies/popular',
-            params: {
-                page: pageNumber,
-            },
+            url: `/api/movies/${movieId.value}/actors`,
             headers: {
                 Authorization: `Bearer ${token.value}`,
             },
         });
 
         if (status === 200) {
-            const movies: PopularMovie[] = [];
+            const actors: Actor[] = [];
 
-            data.data.forEach((rawMovie: any) => {
-                movies.push(
-                    new PopularMovie(
-                        new MovieId(rawMovie.id),
-                        new MovieCoverUrl(
-                            `${rawMovie.imageBaseUrl}${rawMovie.backdrop_path}`,
-                        ),
-                        new MovieTitle(rawMovie.title),
+            data.data.forEach((rawActor: any) => {
+                actors.push(
+                    new Actor(
+                        rawActor.name,
+                        `${rawActor.imageBaseUrl}${rawActor.profile_path}`,
                     ),
                 );
             });
 
-            return movies;
+            return actors;
         }
 
         return new ServerError(500, 'Something wrong happened');
