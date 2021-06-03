@@ -9,8 +9,8 @@ import {
     Username,
     Password,
     RefreshToken,
-} from '../../domain/authentication/value_objects';
-import { axiosInstance } from './core/axios_instance';
+} from '../../domain/core/value_objects';
+import { axiosInstance } from '../core/axios_instance';
 
 export async function login(
     username: Username,
