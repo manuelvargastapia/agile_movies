@@ -1,4 +1,4 @@
-import { ServerError } from '../../domain/user/user_failures';
+import { ServerError, TokenExpired } from '../../domain/user/user_failures';
 import { User } from '../../domain/user/user';
 import {
     Username,
@@ -31,6 +31,13 @@ export async function getUserInfo(token: Token): Promise<UserFailure | User> {
 
         return new ServerError(500, 'Something wrong happened');
     } catch (error) {
+        if (error.response.status === 401) {
+            return new TokenExpired(
+                error.response.status,
+                error.response.data.message,
+            );
+        }
+
         return new ServerError(500, 'Something wrong happened');
     }
 }

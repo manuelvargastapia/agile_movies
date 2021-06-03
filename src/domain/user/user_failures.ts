@@ -10,3 +10,5 @@ export abstract class UserFailure extends Error {
 }
 
 export class ServerError extends UserFailure {}
+
+export class TokenExpired extends UserFailure {}
