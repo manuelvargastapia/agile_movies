@@ -4,10 +4,7 @@ import {
     AuthFailure,
     TokenExpired,
 } from '../../../domain/authentication/auth_failures';
-import {
-    EmailAddress,
-    Password,
-} from '../../../domain/authentication/value_objects';
+import { EmailAddress, Password } from '../../../domain/core/value_objects';
 import { LoginState } from './login_state';
 
 const initialState: LoginState = {

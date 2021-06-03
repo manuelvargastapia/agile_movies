@@ -8,7 +8,7 @@ import {
     Username,
     Password,
     RefreshToken,
-} from '../../../domain/authentication/value_objects';
+} from '../../../domain/core/value_objects';
 
 export const loginWithCredentials = (username: string, password: string) => {
     return async (dispatch: Dispatch) => {

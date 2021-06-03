@@ -1,9 +1,6 @@
 import { AuthData } from '../../../domain/authentication/auth_data';
 import { AuthFailure } from '../../../domain/authentication/auth_failures';
-import {
-    EmailAddress,
-    Password,
-} from '../../../domain/authentication/value_objects';
+import { EmailAddress, Password } from '../../../domain/core/value_objects';
 
 export interface LoginState {
     isLoggedIn: boolean;
