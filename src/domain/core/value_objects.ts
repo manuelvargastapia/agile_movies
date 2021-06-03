@@ -61,3 +61,41 @@ export class RefreshToken implements ValueObject<string> {
         this.value = value;
     }
 }
+
+export class MovieBannerUrl implements ValueObject<string> {
+    value: string;
+
+    constructor(value: string) {
+        this.value = value;
+    }
+}
+
+export class MovieCoverUrl implements ValueObject<string> {
+    value: string;
+
+    constructor(value: string) {
+        this.value = value;
+    }
+}
+
+export class MovieId implements ValueObject<number> {
+    value: number;
+
+    constructor(value: number) {
+        this.value = value;
+    }
+}
+export class MovieTitle implements ValueObject<string> {
+    value: string;
+
+    constructor(value: string) {
+        this.value = value;
+    }
+}
+export class MovieOverview implements ValueObject<string> {
+    value: string;
+
+    constructor(value: string) {
+        this.value = value;
+    }
+}
