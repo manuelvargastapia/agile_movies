@@ -1,4 +1,4 @@
-export abstract class AuthFailure extends Error {
+export abstract class UserFailure extends Error {
     statusCode: number;
     message: string;
 
@@ -9,8 +9,4 @@ export abstract class AuthFailure extends Error {
     }
 }
 
-export class ServerError extends AuthFailure {}
-
-export class InvalidCredentials extends AuthFailure {}
-
-export class TokenExpired extends AuthFailure {}
+export class ServerError extends UserFailure {}

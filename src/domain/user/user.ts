@@ -1,4 +1,9 @@
-import { EmailAddress, Username, Firstname, Lastname } from './value_objects';
+import {
+    EmailAddress,
+    Username,
+    Firstname,
+    Lastname,
+} from '../core/value_objects';
 
 export class User {
     username: Username;

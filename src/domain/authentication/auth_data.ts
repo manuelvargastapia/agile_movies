@@ -1,4 +1,4 @@
-import { RefreshToken, Token } from './value_objects';
+import { RefreshToken, Token } from '../core/value_objects';
 
 export class AuthData {
     token: Token;
