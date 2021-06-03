@@ -10,6 +10,7 @@ const initialState: NowPlayingState = {
     isFetching: false,
     tokenExpired: false,
     pageNumber: 1,
+    movieFailureOrData: [],
 };
 
 const nowPlayingSlice = createSlice({

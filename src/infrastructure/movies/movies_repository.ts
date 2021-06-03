@@ -33,10 +33,7 @@ export async function getMovies(
 
         const { status, data } = await axiosInstance({
             method: 'GET',
-            url: `/api/movies/${apiUrl}`,
-            params: {
-                page: pageNumber,
-            },
+            url: `/api/movies${apiUrl}?page=${pageNumber}`,
             headers: {
                 Authorization: `Bearer ${token.value}`,
             },
@@ -78,6 +75,8 @@ export async function getMovies(
 
         return new ServerError(500, 'Something wrong happened');
     } catch (error) {
+        console.log(error);
+
         if (error.response.status === 401) {
             return new TokenExpired(
                 error.response.status,

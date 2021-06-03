@@ -3,7 +3,7 @@ import { PopularMovie } from '../../../domain/movies/popular';
 
 export interface PopularState {
     isFetching: boolean;
-    movieFailureOrData?: MovieFailure | PopularMovie[];
+    movieFailureOrData: MovieFailure | PopularMovie[];
     tokenExpired: boolean;
     pageNumber: number;
 }

@@ -1,12 +1,12 @@
 import { AuthData } from '../../../domain/authentication/auth_data';
 import { AuthFailure } from '../../../domain/authentication/auth_failures';
-import { EmailAddress, Password } from '../../../domain/core/value_objects';
+import { Password, Username } from '../../../domain/core/value_objects';
 
 export interface LoginState {
     isLoggedIn: boolean;
-    emailAddress: EmailAddress;
+    username: Username;
     password: Password;
     isSubmitting: boolean;
     tokenExpired: boolean;
-    authFailureOrData?: AuthFailure | AuthData;
+    authFailureOrData: AuthFailure | AuthData;
 }

@@ -1,4 +1,10 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import {
+    EmailAddress,
+    Firstname,
+    Lastname,
+    Username,
+} from '../../../domain/core/value_objects';
 import { User } from '../../../domain/user/user';
 import { TokenExpired, UserFailure } from '../../../domain/user/user_failures';
 import { UserInfoState } from './info_state';
@@ -6,6 +12,12 @@ import { UserInfoState } from './info_state';
 const initialState: UserInfoState = {
     isFetching: false,
     tokenExpired: false,
+    userFailureOrData: new User(
+        new Username(''),
+        new EmailAddress(''),
+        new Firstname(''),
+        new Lastname(''),
+    ),
 };
 
 const infoSlice = createSlice({

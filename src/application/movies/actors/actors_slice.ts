@@ -9,6 +9,7 @@ import { ActorsState } from './actors_state';
 const initialState: ActorsState = {
     isFetching: false,
     tokenExpired: false,
+    actorFailureOrData: [],
 };
 
 const actorsSlice = createSlice({

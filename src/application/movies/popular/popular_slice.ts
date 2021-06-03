@@ -10,6 +10,7 @@ const initialState: PopularState = {
     isFetching: false,
     tokenExpired: false,
     pageNumber: 1,
+    movieFailureOrData: [],
 };
 
 const popularSlice = createSlice({

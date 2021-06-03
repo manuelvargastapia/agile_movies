@@ -3,6 +3,6 @@ import { UserFailure } from '../../../domain/user/user_failures';
 
 export interface UserInfoState {
     isFetching: boolean;
-    userFailureOrData?: UserFailure | User;
+    userFailureOrData: UserFailure | User;
     tokenExpired: boolean;
 }

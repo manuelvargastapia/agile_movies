@@ -9,6 +9,7 @@ import {
     Username,
     Password,
     RefreshToken,
+    Token,
 } from '../../domain/core/value_objects';
 import { axiosInstance } from '../core/axios_instance';
 
@@ -28,8 +29,8 @@ export async function login(
 
         if (status === 201) {
             return new AuthData(
-                data.data.payload.token,
-                data.data.payload.refresh_token,
+                new Token(data.data.payload.token),
+                new RefreshToken(data.data.payload.refresh_token),
             );
         }
 
@@ -66,7 +67,10 @@ export async function refreshToken(
         });
 
         if (status === 201) {
-            return new AuthData(data.data.payload.token);
+            return new AuthData(
+                new Token(data.data.payload.token),
+                new RefreshToken(''),
+            );
         }
 
         return new ServerError(500, 'Something wrong happened');

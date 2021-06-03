@@ -3,6 +3,6 @@ import { MovieFailure } from '../../../domain/movies/movie_failures';
 
 export interface ActorsState {
     isFetching: boolean;
-    actorFailureOrData?: MovieFailure | Actor[];
+    actorFailureOrData: MovieFailure | Actor[];
     tokenExpired: boolean;
 }
