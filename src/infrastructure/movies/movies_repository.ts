@@ -33,7 +33,7 @@ export async function getMovies(
         }
 
         const apiUrl =
-            movieAPI === MovieAPI.NOW_PLAYING ? '/now_playing' : 'popular';
+            movieAPI === MovieAPI.NOW_PLAYING ? '/now_playing' : '/popular';
 
         const { status, data } = await axiosInstance({
             method: 'GET',
