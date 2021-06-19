@@ -38,6 +38,7 @@ const nowPlayingSlice = createSlice({
             state.isFetching = false;
             state.tokenExpired = action.payload instanceof TokenExpired;
             state.movieFailureOrData = action.payload;
+            state.pageNumber = 1;
         },
         incrementPageNumber(state) {
             state.pageNumber++;
