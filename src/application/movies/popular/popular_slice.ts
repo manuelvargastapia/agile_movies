@@ -20,19 +20,28 @@ const popularSlice = createSlice({
         fetchingStarted(state) {
             state.isFetching = true;
         },
-        getPopularMovies(
-            state,
-            action: PayloadAction<MovieFailure | PopularMovie[]>,
-        ) {
+        fetchingSucceeded(state, action: PayloadAction<PopularMovie[]>) {
             state.isFetching = false;
-            state.movieFailureOrData = action.payload;
 
-            if (action.payload instanceof TokenExpired) {
-                state.tokenExpired = true;
+            // If current state is a failure, replace it with the new payload,
+            // otherwise create a new one by merge
+            if (state.movieFailureOrData instanceof MovieFailure) {
+                state.movieFailureOrData = action.payload;
             } else {
-                state.tokenExpired = false;
-                state.pageNumber++;
+                state.movieFailureOrData = [
+                    ...(state.movieFailureOrData as PopularMovie[]),
+                    ...action.payload,
+                ];
             }
+        },
+        fetchingFailed(state, action: PayloadAction<MovieFailure>) {
+            state.isFetching = false;
+            state.tokenExpired = action.payload instanceof TokenExpired;
+            state.movieFailureOrData = action.payload;
+            state.pageNumber = 1;
+        },
+        incrementPageNumber(state) {
+            state.pageNumber++;
         },
     },
 });
