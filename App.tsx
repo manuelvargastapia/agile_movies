@@ -1,12 +1,12 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { appStore } from './src/application/store';
-import Router from './src/presentation/router/Router';
+import SplashPage from './src/presentation/splash/SplashPage';
 
 const App = () => {
     return (
         <Provider store={appStore}>
-            <Router />
+            <SplashPage />
         </Provider>
     );
 };

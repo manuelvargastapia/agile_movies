@@ -20,6 +20,7 @@ import { AuthFailure } from '../../../domain/authentication/auth_failures';
 // stored data (token in AsyncStorage)
 export const loginWithStoredToken = () => {
     return async (dispatch: Dispatch) => {
+        dispatch(loginActions.submittingStarted());
         const authFailureOrData = await readAuthData();
         if (authFailureOrData instanceof AuthData) {
             dispatch(loginActions.loginSucceeded(authFailureOrData));
