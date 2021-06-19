@@ -10,6 +10,7 @@
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
     },
     "dependencies": {
+        "@react-native-async-storage/async-storage": "1.15.5",
         "@react-native-community/art": "1.2.0",
         "@reduxjs/toolkit": "1.5.1",
         "axios": "0.21.1",
