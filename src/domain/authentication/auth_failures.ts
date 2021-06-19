@@ -1,11 +1,11 @@
 export abstract class AuthFailure extends Error {
-    statusCode: number;
+    statusCode?: number;
     message: string;
 
-    constructor(statusCode: number, message: string) {
+    constructor(message: string, statusCode?: number) {
         super(message);
-        this.statusCode = statusCode;
         this.message = message;
+        this.statusCode = statusCode;
     }
 }
 
@@ -14,3 +14,7 @@ export class ServerError extends AuthFailure {}
 export class InvalidCredentials extends AuthFailure {}
 
 export class TokenExpired extends AuthFailure {}
+
+export class StorageFailed extends AuthFailure {}
+
+export class NoDataStored extends AuthFailure {}
