@@ -11,14 +11,13 @@ import { useHistory } from 'react-router-native';
 import { Bar } from 'react-native-progress';
 import { loginWithCredentials } from '../../application/authentication/login/login_actions';
 import { loginActions } from '../../application/authentication/login/login_slice';
-import { AuthData } from '../../domain/authentication/auth_data';
 import { AuthFailure } from '../../domain/authentication/auth_failures';
 import { useAppDispatch, useAppSelector } from '../../application/hooks';
 
 const LoginPage = () => {
     const { isLoggedIn, username, password, isSubmitting, authFailureOrData } =
         useAppSelector(({ login }) => login);
-    const authDispatch = useAppDispatch();
+    const dispatch = useAppDispatch();
     const history = useHistory();
 
     useEffect(() => {
@@ -33,7 +32,7 @@ const LoginPage = () => {
                 onChange={(
                     event: NativeSyntheticEvent<TextInputChangeEventData>,
                 ) => {
-                    authDispatch(
+                    dispatch(
                         loginActions.usernameChanged(event.nativeEvent.text),
                     );
                 }}
@@ -42,7 +41,7 @@ const LoginPage = () => {
                 onChange={(
                     event: NativeSyntheticEvent<TextInputChangeEventData>,
                 ) => {
-                    authDispatch(
+                    dispatch(
                         loginActions.passwordChanged(event.nativeEvent.text),
                     );
                 }}
@@ -50,14 +49,11 @@ const LoginPage = () => {
             <Button
                 title="LOGIN"
                 onPress={() => {
-                    authDispatch(
+                    dispatch(
                         loginWithCredentials(username.value, password.value),
                     );
                 }}
             />
-            {authFailureOrData instanceof AuthData && (
-                <Text>{authFailureOrData.token.value}</Text>
-            )}
             {authFailureOrData instanceof AuthFailure && (
                 <Text>{authFailureOrData.message}</Text>
             )}
