@@ -1,9 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { AuthData } from '../../../domain/authentication/auth_data';
-import {
-    AuthFailure,
-    TokenExpired,
-} from '../../../domain/authentication/auth_failures';
+import { AuthFailure } from '../../../domain/authentication/auth_failures';
 import {
     Password,
     RefreshToken,
@@ -17,8 +14,7 @@ const initialState: LoginState = {
     username: new Username(''),
     password: new Password(''),
     isSubmitting: false,
-    tokenExpired: false,
-    authFailureOrData: new AuthData(new Token(''), new RefreshToken('')),
+    authFailureOrData: new AuthData(new Token(null), new RefreshToken(null)),
 };
 
 const loginSlice = createSlice({
@@ -28,36 +24,15 @@ const loginSlice = createSlice({
         submittingStarted(state) {
             state.isSubmitting = true;
         },
-        login(state, action: PayloadAction<AuthFailure | AuthData>) {
+        loginSucceeded(state, action: PayloadAction<AuthData>) {
             state.authFailureOrData = action.payload;
             state.isSubmitting = false;
-
-            if (action.payload instanceof AuthFailure) {
-                state.isLoggedIn = false;
-                if (action.payload instanceof TokenExpired) {
-                    state.tokenExpired = true;
-                    // TODO: store tokens and expired state in AsyncStorage
-                }
-            }
-
-            if (action.payload instanceof AuthData) {
-                state.isLoggedIn = true;
-                state.tokenExpired = false;
-                // TODO: store tokens and expired state in AsyncStorage
-            }
+            state.isLoggedIn = true;
         },
-        refreshToken(state, action: PayloadAction<AuthFailure | AuthData>) {
-            if (action.payload instanceof AuthFailure) {
-                state.isLoggedIn = false;
-            }
-
-            if (action.payload instanceof AuthData) {
-                state.isLoggedIn = true;
-                // TODO: update tokens and expired state in AsyncStorage
-            }
-
+        loginFailed(state, action: PayloadAction<AuthFailure>) {
             state.authFailureOrData = action.payload;
             state.isSubmitting = false;
+            state.isLoggedIn = false;
         },
         usernameChanged(state, action: PayloadAction<string>) {
             state.username = new Username(action.payload);
