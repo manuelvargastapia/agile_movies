@@ -28,6 +28,10 @@ export async function getMovies(
     movieAPI: MovieAPI,
 ): Promise<MovieFailure | IMovie[]> {
     try {
+        if (!token.isValid()) {
+            return new ServerError(500, 'Something wrong happened');
+        }
+
         const apiUrl =
             movieAPI === MovieAPI.NOW_PLAYING ? '/now_playing' : 'popular';
 
@@ -35,7 +39,7 @@ export async function getMovies(
             method: 'GET',
             url: `/api/movies${apiUrl}?page=${pageNumber}`,
             headers: {
-                Authorization: `Bearer ${token.value}`,
+                Authorization: `Bearer ${token.getOrCrash()}`,
             },
         });
 
@@ -75,8 +79,6 @@ export async function getMovies(
 
         return new ServerError(500, 'Something wrong happened');
     } catch (error) {
-        console.log(error);
-
         if (error.response.status === 401) {
             return new TokenExpired(
                 error.response.status,
