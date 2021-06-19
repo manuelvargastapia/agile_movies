@@ -1,13 +1,15 @@
 import {
     MissingRefreshToken,
     MissingToken,
+    PasswordEmpty,
+    UsernameEmpty,
     ValueFailure,
 } from './value_failures';
 
 abstract class ValueObject<T> {
-    value: ValueFailure<T> | T;
+    value: ValueFailure | T;
 
-    constructor(value: ValueFailure<T> | T) {
+    constructor(value: ValueFailure | T) {
         this.value = value;
     }
 
@@ -34,18 +36,30 @@ export class EmailAddress extends ValueObject<string> {
 }
 
 export class Username extends ValueObject<string> {
-    value: string;
+    value: string | ValueFailure;
 
     constructor(value: string) {
+        if (value.trim() === '') {
+            super(new UsernameEmpty());
+            this.value = new UsernameEmpty();
+            return;
+        }
+
         super(value);
         this.value = value;
     }
 }
 
 export class Password extends ValueObject<string> {
-    value: string;
+    value: string | ValueFailure;
 
     constructor(value: string) {
+        if (value.trim() === '') {
+            super(value);
+            this.value = new PasswordEmpty();
+            return;
+        }
+
         super(value);
         this.value = value;
     }
@@ -70,7 +84,7 @@ export class Lastname extends ValueObject<string> {
 }
 
 export class Token extends ValueObject<string> {
-    value: string | ValueFailure<string>;
+    value: string | ValueFailure;
 
     constructor(value: null | string) {
         if (typeof value === 'string') {
@@ -84,7 +98,7 @@ export class Token extends ValueObject<string> {
 }
 
 export class RefreshToken extends ValueObject<string> {
-    value: string | ValueFailure<string>;
+    value: string | ValueFailure;
 
     constructor(value: null | string) {
         if (typeof value === 'string') {
