@@ -1,11 +1,9 @@
-export abstract class ValueFailure<T> {
-    failedValue?: T;
+export abstract class ValueFailure {}
 
-    constructor(failedValue?: T) {
-        this.failedValue = failedValue;
-    }
-}
+export class MissingToken extends ValueFailure {}
 
-export class MissingToken implements ValueFailure<void> {}
+export class MissingRefreshToken extends ValueFailure {}
 
-export class MissingRefreshToken implements ValueFailure<void> {}
+export class UsernameEmpty extends ValueFailure {}
+
+export class PasswordEmpty extends ValueFailure {}
