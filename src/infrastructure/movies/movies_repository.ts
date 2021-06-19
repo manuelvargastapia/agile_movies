@@ -46,16 +46,18 @@ export async function getMovies(
         if (status === 200) {
             const movies: IMovie[] = [];
 
+            const imageBaseUrl = data.imageBaseUrl;
+
             data.data.forEach((rawMovie: any) => {
                 movies.push(
                     movieAPI === MovieAPI.NOW_PLAYING
                         ? new NowPlayingMovie(
                               new MovieId(rawMovie.id),
                               new MovieCoverUrl(
-                                  `${rawMovie.imageBaseUrl}${rawMovie.backdrop_path}`,
+                                  `${imageBaseUrl}${rawMovie.backdrop_path}`,
                               ),
                               new MovieBannerUrl(
-                                  `${rawMovie.imageBaseUrl}${rawMovie.poster_path}`,
+                                  `${imageBaseUrl}${rawMovie.poster_path}`,
                               ),
                               new MovieTitle(rawMovie.title),
                               new MovieOverview(rawMovie.overview),
@@ -63,10 +65,10 @@ export async function getMovies(
                         : new PopularMovie(
                               new MovieId(rawMovie.id),
                               new MovieCoverUrl(
-                                  `${rawMovie.imageBaseUrl}${rawMovie.backdrop_path}`,
+                                  `${imageBaseUrl}${rawMovie.backdrop_path}`,
                               ),
                               new MovieBannerUrl(
-                                  `${rawMovie.imageBaseUrl}${rawMovie.poster_path}`,
+                                  `${imageBaseUrl}${rawMovie.poster_path}`,
                               ),
                               new MovieTitle(rawMovie.title),
                               new MovieOverview(rawMovie.overview),
