@@ -1,23 +1,41 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     View,
-    TextInput,
-    Button,
-    Text,
     NativeSyntheticEvent,
     TextInputChangeEventData,
+    StyleSheet,
 } from 'react-native';
+import {
+    TextInput,
+    Button,
+    HelperText,
+    Colors,
+    useTheme,
+} from 'react-native-paper';
 import { useHistory } from 'react-router-native';
 import { Bar } from 'react-native-progress';
 import { loginWithCredentials } from '../../application/authentication/login/login_actions';
 import { loginActions } from '../../application/authentication/login/login_slice';
-import { AuthFailure } from '../../domain/authentication/auth_failures';
+import {
+    AuthFailure,
+    InvalidCredentials,
+    ServerError,
+    StorageFailed,
+} from '../../domain/authentication/auth_failures';
 import { useAppDispatch, useAppSelector } from '../../application/hooks';
+import { PasswordEmpty, UsernameEmpty } from '../../domain/core/value_failures';
 
 const LoginPage = () => {
+    // Prevent showing error styles before first submition
+    const [validationAllowed, setValidationAllowed] = useState(false);
+
+    const { colors } = useTheme();
+
     const { isLoggedIn, username, password, isSubmitting, authFailureOrData } =
         useAppSelector(({ login }) => login);
+
     const dispatch = useAppDispatch();
+
     const history = useHistory();
 
     useEffect(() => {
@@ -26,40 +44,94 @@ const LoginPage = () => {
         }
     }, [history, isLoggedIn]);
 
+    function usernameInputHandler(
+        event: NativeSyntheticEvent<TextInputChangeEventData>,
+    ) {
+        dispatch(loginActions.usernameChanged(event.nativeEvent.text));
+    }
+
+    function passwordInputHandler(
+        event: NativeSyntheticEvent<TextInputChangeEventData>,
+    ) {
+        dispatch(loginActions.passwordChanged(event.nativeEvent.text));
+    }
+
+    function submitHandler() {
+        setValidationAllowed(true);
+        if (username.isValid() && password.isValid()) {
+            dispatch(
+                loginWithCredentials(
+                    username.getOrCrash(),
+                    password.getOrCrash(),
+                ),
+            );
+        }
+    }
+
     return (
-        <View>
+        <View style={{ ...styles.container, backgroundColor: colors.backdrop }}>
             <TextInput
-                onChange={(
-                    event: NativeSyntheticEvent<TextInputChangeEventData>,
-                ) => {
-                    dispatch(
-                        loginActions.usernameChanged(event.nativeEvent.text),
-                    );
-                }}
+                style={styles.textInput}
+                onChange={usernameInputHandler}
+                label="Usuario"
+                left={<TextInput.Icon name="account" />}
+                error={
+                    validationAllowed && username.value instanceof UsernameEmpty
+                }
             />
             <TextInput
-                onChange={(
-                    event: NativeSyntheticEvent<TextInputChangeEventData>,
-                ) => {
-                    dispatch(
-                        loginActions.passwordChanged(event.nativeEvent.text),
-                    );
-                }}
+                style={styles.textInput}
+                onChange={passwordInputHandler}
+                label="Contraseña"
+                left={<TextInput.Icon name="lock" />}
+                secureTextEntry
+                error={
+                    validationAllowed && password.value instanceof PasswordEmpty
+                }
             />
             <Button
-                title="LOGIN"
-                onPress={() => {
-                    dispatch(
-                        loginWithCredentials(username.value, password.value),
-                    );
-                }}
-            />
+                style={styles.button}
+                onPress={submitHandler}
+                mode="contained">
+                Entrar
+            </Button>
+            {/* Set width to null to use all the available space */}
+            {isSubmitting && <Bar progress={0.3} width={null} />}
             {authFailureOrData instanceof AuthFailure && (
-                <Text>{authFailureOrData.message}</Text>
+                <HelperText
+                    style={styles.helperText}
+                    type="error"
+                    // Show only relevant messages
+                    visible={
+                        authFailureOrData instanceof ServerError ||
+                        authFailureOrData instanceof InvalidCredentials ||
+                        authFailureOrData instanceof StorageFailed
+                    }
+                    padding="none">
+                    {authFailureOrData.message}
+                </HelperText>
             )}
-            {isSubmitting && <Bar progress={0.3} width={200} />}
         </View>
     );
 };
 
 export default LoginPage;
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        justifyContent: 'center',
+        paddingHorizontal: 50,
+    },
+    textInput: {
+        marginVertical: 8,
+    },
+    button: {
+        marginVertical: 16,
+    },
+    helperText: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: Colors.white,
+    },
+});
