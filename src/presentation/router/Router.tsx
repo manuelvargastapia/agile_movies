@@ -1,8 +1,9 @@
 import React, { useEffect, useRef } from 'react';
-import { NativeRouter, Redirect, Route } from 'react-router-native';
+import { NativeRouter, Redirect, Route, Switch } from 'react-router-native';
 import { loginWithStoredToken } from '../../application/authentication/login/login_actions';
 import { useAppDispatch, useAppSelector } from '../../application/hooks';
 import LoginPage from '../authentication/LoginPage';
+import MovieDetails from '../movies/components/MovieDetails';
 import MoviesPage from '../movies/MoviesPage';
 
 const Router = () => {
@@ -22,7 +23,7 @@ const Router = () => {
     return (
         <NativeRouter>
             {!firstRender.current && !isSubmitting && (
-                <Route exact path="/">
+                <Route exact path="*">
                     {isLoggedIn ? (
                         <Redirect to="/movies" />
                     ) : (
@@ -30,8 +31,11 @@ const Router = () => {
                     )}
                 </Route>
             )}
-            <Route path="/movies" component={MoviesPage} />
-            <Route path="/login" component={LoginPage} />
+            <Switch>
+                <Route path="/login" component={LoginPage} />
+                <Route exact path="/movies" component={MoviesPage} />
+                <Route path="/movies/:movieId" component={MovieDetails} />
+            </Switch>
         </NativeRouter>
     );
 };
