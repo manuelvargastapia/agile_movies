@@ -1,6 +1,10 @@
 import React from 'react';
 import { Provider } from 'react-redux';
-import { Provider as PaperProvider, DefaultTheme } from 'react-native-paper';
+import {
+    Provider as PaperProvider,
+    DefaultTheme,
+    Colors,
+} from 'react-native-paper';
 import { appStore } from './src/application/store';
 import Router from './src/presentation/router/Router';
 
@@ -10,7 +14,11 @@ const App = () => {
             <PaperProvider
                 theme={{
                     ...DefaultTheme,
-                    dark: true,
+                    colors: {
+                        ...DefaultTheme.colors,
+                        backdrop: Colors.grey900,
+                        surface: Colors.white,
+                    },
                 }}>
                 <Router />
             </PaperProvider>
