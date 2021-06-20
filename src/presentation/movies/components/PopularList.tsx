@@ -7,14 +7,10 @@ import {
     Image,
     StyleSheet,
     Text,
+    TouchableHighlight,
     View,
 } from 'react-native';
-import {
-    Colors,
-    HelperText,
-    TouchableRipple,
-    useTheme,
-} from 'react-native-paper';
+import { Colors, HelperText, useTheme } from 'react-native-paper';
 import { useHistory } from 'react-router-native';
 import { loginWithRefreshToken } from '../../../application/authentication/login/login_actions';
 import { useAppDispatch, useAppSelector } from '../../../application/hooks';
@@ -66,11 +62,10 @@ const PopularList: React.FC<{ authData: AuthData }> = ({ authData }) => {
 
     function renderItem({ item }: { item: PopularMovie }) {
         return (
-            <TouchableRipple
-                style={styles.converImageContainer}
-                onPress={onSelectMovie.bind(null, item)}
-                rippleColor={colors.accent}>
-                <>
+            <View style={styles.converImageContainer}>
+                <TouchableHighlight
+                    onPress={onSelectMovie.bind(null, item)}
+                    underlayColor={colors.accent}>
                     <Image
                         style={styles.coverImage}
                         resizeMode="contain"
@@ -78,11 +73,9 @@ const PopularList: React.FC<{ authData: AuthData }> = ({ authData }) => {
                             uri: item.movieBannerUrl.value,
                         }}
                     />
-                    <Text style={styles.movieTitle}>
-                        {item.movieTitle.value}
-                    </Text>
-                </>
-            </TouchableRipple>
+                </TouchableHighlight>
+                <Text style={styles.movieTitle}>{item.movieTitle.value}</Text>
+            </View>
         );
     }
 
@@ -135,7 +128,6 @@ export default PopularList;
 const styles = StyleSheet.create({
     converImageContainer: {
         flex: 1,
-        alignItems: 'center',
         paddingBottom: 16,
         marginHorizontal: 30,
         marginBottom: 0,
@@ -146,6 +138,7 @@ const styles = StyleSheet.create({
     },
     movieTitle: {
         color: Colors.white,
+        textAlign: 'center',
     },
     loaderContainer: {
         flex: 1,

@@ -4,6 +4,7 @@ import {
     Dimensions,
     Image,
     StyleSheet,
+    TouchableHighlight,
     View,
 } from 'react-native';
 import Carousel from 'react-native-snap-carousel';
@@ -17,12 +18,7 @@ import { NowPlayingMovie } from '../../../domain/movies/now_playing';
 import { useAppDispatch, useAppSelector } from '../../../application/hooks';
 import { loginWithRefreshToken } from '../../../application/authentication/login/login_actions';
 import { nowPlayingActions } from '../../../application/movies/now_playing/now_playing_slice';
-import {
-    Colors,
-    HelperText,
-    TouchableRipple,
-    useTheme,
-} from 'react-native-paper';
+import { Colors, HelperText, useTheme } from 'react-native-paper';
 import { useHistory } from 'react-router-native';
 
 const screenWidth = Dimensions.get('screen').width;
@@ -66,9 +62,9 @@ const NowPlayingList: React.FC<{ authData: AuthData }> = ({ authData }) => {
 
     function renderItem({ item }: { item: NowPlayingMovie }) {
         return (
-            <TouchableRipple
+            <TouchableHighlight
                 onPress={onSelectMovie.bind(null, item)}
-                rippleColor={colors.accent}>
+                underlayColor={colors.accent}>
                 <Image
                     style={styles.bannerImage}
                     resizeMode="contain"
@@ -76,7 +72,7 @@ const NowPlayingList: React.FC<{ authData: AuthData }> = ({ authData }) => {
                         uri: item.movieBannerUrl.value,
                     }}
                 />
-            </TouchableRipple>
+            </TouchableHighlight>
         );
     }
 
@@ -114,10 +110,14 @@ const NowPlayingList: React.FC<{ authData: AuthData }> = ({ authData }) => {
                         data={movieFailureOrData}
                         renderItem={renderItem}
                         sliderWidth={screenWidth}
-                        itemWidth={screenWidth / 2}
+                        itemWidth={screenWidth * 0.4}
+                        inactiveSlideOpacity={0.4}
+                        onEndReachedThreshold={0.1}
                         onEndReached={onEndReached}
                         ListFooterComponent={listFooterComponent}
                         keyExtractor={(_, index) => index.toString()}
+                        enableMomentum
+                        decelerationRate={0.9}
                     />
                 )
             )}

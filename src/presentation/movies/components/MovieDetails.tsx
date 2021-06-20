@@ -35,13 +35,7 @@ const MovieDetails = () => {
 
     const { state } = useLocation<{ movie: IMovie; authData: AuthData }>();
 
-    const {
-        movieId,
-        movieCoverUrl,
-        movieBannerUrl,
-        movieTitle,
-        movieOverview,
-    } = state.movie;
+    const { movieId, movieCoverUrl, movieTitle, movieOverview } = state.movie;
 
     const { token, refreshToken } = state.authData;
 
@@ -93,11 +87,6 @@ const MovieDetails = () => {
                 />
                 <View style={styles.contentContainer}>
                     <Headline style={styles.title}>{movieTitle.value}</Headline>
-                    {/* <Image
-                        style={styles.movieBannerImage}
-                        resizeMode="contain"
-                        source={{ uri: movieBannerUrl.value }}
-                    /> */}
                     <Paragraph style={styles.paragraph}>
                         {movieOverview.value}
                     </Paragraph>
@@ -121,7 +110,10 @@ const MovieDetails = () => {
                                 renderItem={renderItem}
                                 sliderWidth={screenWidth}
                                 itemWidth={screenWidth / 2}
+                                inactiveSlideOpacity={0.4}
                                 keyExtractor={(_, index) => index.toString()}
+                                enableMomentum
+                                decelerationRate={0.9}
                             />
                         )
                     )}
