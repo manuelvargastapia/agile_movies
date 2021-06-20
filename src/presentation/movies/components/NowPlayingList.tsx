@@ -32,8 +32,15 @@ const NowPlayingList: React.FC<{ authData: AuthData }> = ({ authData }) => {
 
     const history = useHistory();
 
-    const { isFetching, pageNumber, movieFailureOrData, tokenExpired } =
-        useAppSelector(({ nowPlaying }) => nowPlaying);
+    const {
+        isFetching,
+        pageNumber,
+        lastPageNumber,
+        movieFailureOrData,
+        tokenExpired,
+    } = useAppSelector(({ nowPlaying }) => nowPlaying);
+
+    const fetchingAllowed = pageNumber !== lastPageNumber;
 
     const dispatch = useAppDispatch();
 
@@ -44,11 +51,13 @@ const NowPlayingList: React.FC<{ authData: AuthData }> = ({ authData }) => {
     }, [authData.refreshToken, dispatch, tokenExpired]);
 
     useEffect(() => {
-        dispatch(fetchNowPlayingMovies(authData.token, pageNumber));
-    }, [authData.token, dispatch, pageNumber]);
+        if (fetchingAllowed) {
+            dispatch(fetchNowPlayingMovies(authData.token, pageNumber));
+        }
+    }, [authData.token, dispatch, fetchingAllowed, pageNumber]);
 
     function onSelectMovie(movie: NowPlayingMovie) {
-        history.push(`/movies/${movie.movieId.value}`);
+        history.push('/movies/details', { movie, authData });
     }
 
     function onEndReached() {
@@ -90,7 +99,7 @@ const NowPlayingList: React.FC<{ authData: AuthData }> = ({ authData }) => {
     return (
         <>
             {movieFailureOrData instanceof MovieFailure ? (
-                <View style={styles.HelperTextContainer}>
+                <View style={styles.helperTextContainer}>
                     <HelperText
                         style={styles.helperText}
                         type="error"
@@ -128,7 +137,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: 50,
     },
-    HelperTextContainer: {
+    helperTextContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',

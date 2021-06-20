@@ -27,13 +27,20 @@ import {
 } from '../../../domain/movies/movie_failures';
 import { PopularMovie } from '../../../domain/movies/popular';
 
-const NowPlayingList: React.FC<{ authData: AuthData }> = ({ authData }) => {
+const PopularList: React.FC<{ authData: AuthData }> = ({ authData }) => {
     const { colors } = useTheme();
 
     const history = useHistory();
 
-    const { isFetching, movieFailureOrData, pageNumber, tokenExpired } =
-        useAppSelector(({ popular }) => popular);
+    const {
+        isFetching,
+        movieFailureOrData,
+        pageNumber,
+        lastPageNumber,
+        tokenExpired,
+    } = useAppSelector(({ popular }) => popular);
+
+    const fetchingAllowed = pageNumber !== lastPageNumber;
 
     const dispatch = useAppDispatch();
 
@@ -44,11 +51,13 @@ const NowPlayingList: React.FC<{ authData: AuthData }> = ({ authData }) => {
     }, [authData.refreshToken, dispatch, tokenExpired]);
 
     useEffect(() => {
-        dispatch(fetchPopularMovies(authData.token, pageNumber));
-    }, [authData.token, dispatch, pageNumber]);
+        if (fetchingAllowed) {
+            dispatch(fetchPopularMovies(authData.token, pageNumber));
+        }
+    }, [authData.token, dispatch, fetchingAllowed, pageNumber]);
 
     function onSelectMovie(movie: PopularMovie) {
-        history.push(`/movies/${movie.movieId.value}`);
+        history.push('/movies/details', { movie, authData });
     }
 
     function onEndReached() {
@@ -121,7 +130,7 @@ const NowPlayingList: React.FC<{ authData: AuthData }> = ({ authData }) => {
     );
 };
 
-export default NowPlayingList;
+export default PopularList;
 
 const styles = StyleSheet.create({
     converImageContainer: {

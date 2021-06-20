@@ -6,4 +6,5 @@ export interface PopularState {
     movieFailureOrData: MovieFailure | PopularMovie[];
     tokenExpired: boolean;
     pageNumber: number;
+    lastPageNumber: number;
 }

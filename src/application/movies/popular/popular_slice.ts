@@ -10,6 +10,7 @@ const initialState: PopularState = {
     isFetching: false,
     tokenExpired: false,
     pageNumber: 1,
+    lastPageNumber: 0,
     movieFailureOrData: [],
 };
 
@@ -32,6 +33,8 @@ const popularSlice = createSlice({
                     ...(state.movieFailureOrData as PopularMovie[]),
                     ...action.payload,
                 ];
+
+                state.lastPageNumber = state.pageNumber;
             }
         },
         fetchingFailed(state, action: PayloadAction<MovieFailure>) {

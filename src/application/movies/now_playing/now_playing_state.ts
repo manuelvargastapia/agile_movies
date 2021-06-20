@@ -6,4 +6,5 @@ export interface NowPlayingState {
     movieFailureOrData: MovieFailure | NowPlayingMovie[];
     tokenExpired: boolean;
     pageNumber: number;
+    lastPageNumber: number;
 }
