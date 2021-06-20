@@ -1,34 +1,23 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Appbar, Menu, useTheme } from 'react-native-paper';
-import {
-    loginWithRefreshToken,
-    logout,
-} from '../../../application/authentication/login/login_actions';
-import { useAppDispatch, useAppSelector } from '../../../application/hooks';
-import { fetchUserInfo } from '../../../application/user/user_info/info_actions';
-import { AuthData } from '../../../domain/authentication/auth_data';
+import { useHistory } from 'react-router-native';
+import { logout } from '../../../application/authentication/login/login_actions';
+import { useAppDispatch } from '../../../application/hooks';
 import { User } from '../../../domain/user/user';
+import { UserFailure } from '../../../domain/user/user_failures';
 
-const Header: React.FC<{ authData: AuthData }> = ({ authData }) => {
+const Header: React.FC<{
+    userFailureOrData: UserFailure | User;
+    title: string;
+    backAction?: boolean;
+}> = ({ userFailureOrData, title, backAction = false }) => {
     const [isMenuVisible, setIsMenuVisible] = useState(false);
 
     const { colors } = useTheme();
 
-    const { tokenExpired, userFailureOrData } = useAppSelector(
-        ({ userInfo }) => userInfo,
-    );
+    const history = useHistory();
 
     const dispatch = useAppDispatch();
-
-    useEffect(() => {
-        if (tokenExpired) {
-            dispatch(loginWithRefreshToken(authData.refreshToken));
-        }
-    }, [authData.refreshToken, dispatch, tokenExpired]);
-
-    useEffect(() => {
-        dispatch(fetchUserInfo(authData.token));
-    }, [authData.token, dispatch]);
 
     function logoutHandler() {
         dispatch(logout());
@@ -42,9 +31,14 @@ const Header: React.FC<{ authData: AuthData }> = ({ authData }) => {
         setIsMenuVisible(true);
     }
 
+    function goBack() {
+        history.goBack();
+    }
+
     return (
         <Appbar.Header style={{ backgroundColor: colors.placeholder }}>
-            <Appbar.Content title="AgileMovies" />
+            {backAction && <Appbar.BackAction onPress={goBack} />}
+            <Appbar.Content title={title} />
             <Menu
                 visible={isMenuVisible}
                 onDismiss={closeMenu}

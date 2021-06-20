@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Colors, useTheme } from 'react-native-paper';
-import { Redirect } from 'react-router-native';
-import { useAppSelector } from '../../application/hooks';
+import { Redirect, useHistory } from 'react-router-native';
+import { loginWithRefreshToken } from '../../application/authentication/login/login_actions';
+import { useAppDispatch, useAppSelector } from '../../application/hooks';
+import { fetchUserInfo } from '../../application/user/user_info/info_actions';
+import { AuthData } from '../../domain/authentication/auth_data';
 import { AuthFailure } from '../../domain/authentication/auth_failures';
 import Header from './components/Header';
 import NowPlayingList from './components/NowPlayingList';
@@ -11,7 +14,31 @@ import PopularList from './components/PopularList';
 const MoviesPage = () => {
     const { colors } = useTheme();
 
+    const history = useHistory();
+
     const { authFailureOrData } = useAppSelector(({ login }) => login);
+
+    const { tokenExpired, userFailureOrData } = useAppSelector(
+        ({ userInfo }) => userInfo,
+    );
+
+    const dispatch = useAppDispatch();
+
+    useEffect(() => {
+        if (tokenExpired) {
+            if (authFailureOrData instanceof AuthData) {
+                dispatch(loginWithRefreshToken(authFailureOrData.refreshToken));
+            } else {
+                history.replace('/login');
+            }
+        }
+    }, [authFailureOrData, dispatch, history, tokenExpired]);
+
+    useEffect(() => {
+        if (authFailureOrData instanceof AuthData) {
+            dispatch(fetchUserInfo(authFailureOrData.token));
+        }
+    }, [authFailureOrData, dispatch]);
 
     return (
         <>
@@ -21,7 +48,10 @@ const MoviesPage = () => {
                 <Redirect to="/login" />
             ) : (
                 <>
-                    <Header authData={authFailureOrData} />
+                    <Header
+                        userFailureOrData={userFailureOrData}
+                        title="AgileMovies"
+                    />
                     <View
                         style={{
                             ...styles.nowPlayingContainer,
