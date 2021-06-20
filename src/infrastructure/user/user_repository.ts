@@ -12,11 +12,15 @@ import { UserFailure } from '../../domain/user/user_failures';
 
 export async function getUserInfo(token: Token): Promise<UserFailure | User> {
     try {
+        if (!token.isValid()) {
+            return new ServerError(500, 'Something wrong happened');
+        }
+
         const { status, data } = await axiosInstance({
             method: 'GET',
             url: '/api/user/me',
             headers: {
-                Authorization: `Bearer ${token.value}`,
+                Authorization: `Bearer ${token.getOrCrash()}`,
             },
         });
 
