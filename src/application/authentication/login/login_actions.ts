@@ -11,6 +11,7 @@ import {
 } from '../../../domain/core/value_objects';
 import { AuthData } from '../../../domain/authentication/auth_data';
 import {
+    clearStorage,
     readAuthData,
     storeAuthData,
 } from '../../../infrastructure/authentication/async_storage_repository';
@@ -67,5 +68,13 @@ export const loginWithRefreshToken = (token: RefreshToken) => {
         } else {
             dispatch(loginActions.loginFailed(authFailureOrData));
         }
+    };
+};
+
+export const logout = () => {
+    return async (dispatch: Dispatch) => {
+        // For simplicity, we don't really handle the failed case
+        await clearStorage();
+        dispatch(loginActions.logout());
     };
 };

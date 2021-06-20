@@ -34,6 +34,10 @@ const loginSlice = createSlice({
             state.isSubmitting = false;
             state.isLoggedIn = false;
         },
+        logout(state) {
+            state.isLoggedIn = false;
+            state.isSubmitting = false;
+        },
         usernameChanged(state, action: PayloadAction<string>) {
             state.username = new Username(action.payload);
         },

@@ -45,3 +45,12 @@ export async function readAuthData(): Promise<AuthFailure | AuthData> {
         return new StorageFailed('Error retrieving autthentication tokens');
     }
 }
+
+export async function clearStorage(): Promise<AuthFailure | void> {
+    try {
+        await AsyncStorage.removeItem('@token');
+        await AsyncStorage.removeItem('@refresh_token');
+    } catch (error) {
+        return new StorageFailed('Error removing data');
+    }
+}
