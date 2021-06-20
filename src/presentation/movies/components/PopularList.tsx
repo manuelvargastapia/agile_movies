@@ -1,6 +1,7 @@
 import React from 'react';
 import { useEffect } from 'react';
 import {
+    ActivityIndicator,
     Dimensions,
     FlatList,
     Image,
@@ -8,15 +9,29 @@ import {
     Text,
     View,
 } from 'react-native';
-import { Circle } from 'react-native-progress';
+import {
+    Colors,
+    HelperText,
+    TouchableRipple,
+    useTheme,
+} from 'react-native-paper';
+import { useHistory } from 'react-router-native';
 import { loginWithRefreshToken } from '../../../application/authentication/login/login_actions';
 import { useAppDispatch, useAppSelector } from '../../../application/hooks';
 import { fetchPopularMovies } from '../../../application/movies/popular/popular_actions';
 import { popularActions } from '../../../application/movies/popular/popular_slice';
 import { AuthData } from '../../../domain/authentication/auth_data';
-import { MovieFailure } from '../../../domain/movies/movie_failures';
+import {
+    MovieFailure,
+    ServerError,
+} from '../../../domain/movies/movie_failures';
+import { PopularMovie } from '../../../domain/movies/popular';
 
 const NowPlayingList: React.FC<{ authData: AuthData }> = ({ authData }) => {
+    const { colors } = useTheme();
+
+    const history = useHistory();
+
     const { isFetching, movieFailureOrData, pageNumber, tokenExpired } =
         useAppSelector(({ popular }) => popular);
 
@@ -32,41 +47,72 @@ const NowPlayingList: React.FC<{ authData: AuthData }> = ({ authData }) => {
         dispatch(fetchPopularMovies(authData.token, pageNumber));
     }, [authData.token, dispatch, pageNumber]);
 
+    function onSelectMovie(movie: PopularMovie) {
+        history.push(`/movies/${movie.movieId.value}`);
+    }
+
+    function onEndReached() {
+        dispatch(popularActions.incrementPageNumber());
+    }
+
+    function renderItem({ item }: { item: PopularMovie }) {
+        return (
+            <TouchableRipple
+                style={styles.converImageContainer}
+                onPress={onSelectMovie.bind(null, item)}
+                rippleColor={colors.accent}>
+                <>
+                    <Image
+                        style={styles.coverImage}
+                        resizeMode="contain"
+                        source={{
+                            uri: item.movieBannerUrl.value,
+                        }}
+                    />
+                    <Text style={styles.movieTitle}>
+                        {item.movieTitle.value}
+                    </Text>
+                </>
+            </TouchableRipple>
+        );
+    }
+
+    function listFooterComponent() {
+        return (
+            <>
+                {isFetching && (
+                    <View style={styles.loaderContainer}>
+                        <ActivityIndicator
+                            size={50}
+                            animating={true}
+                            color={colors.accent}
+                        />
+                    </View>
+                )}
+            </>
+        );
+    }
+
     return (
         <>
             {movieFailureOrData instanceof MovieFailure ? (
-                <View>
-                    <Text>{movieFailureOrData.message}</Text>
+                <View style={styles.helperTextContainer}>
+                    <HelperText
+                        style={styles.helperText}
+                        type="error"
+                        visible={movieFailureOrData instanceof ServerError}
+                        padding="none">
+                        {movieFailureOrData.message}
+                    </HelperText>
                 </View>
             ) : (
                 movieFailureOrData.length > 0 && (
                     <FlatList
                         data={movieFailureOrData}
-                        renderItem={({ item }) => (
-                            <View style={styles.converImageContainer}>
-                                <Image
-                                    style={styles.coverImage}
-                                    resizeMode="contain"
-                                    source={{
-                                        uri: item.movieBannerUrl.value,
-                                    }}
-                                />
-                                <Text>{item.movieTitle.value}</Text>
-                            </View>
-                        )}
+                        renderItem={renderItem}
                         numColumns={2}
-                        onEndReached={() => {
-                            dispatch(popularActions.incrementPageNumber());
-                        }}
-                        ListFooterComponent={
-                            <>
-                                {isFetching && (
-                                    <View style={styles.loaderContainer}>
-                                        <Circle size={50} indeterminate />
-                                    </View>
-                                )}
-                            </>
-                        }
+                        onEndReached={onEndReached}
+                        ListFooterComponent={listFooterComponent}
                         keyExtractor={(_, index) => index.toString()}
                     />
                 )
@@ -81,15 +127,31 @@ const styles = StyleSheet.create({
     converImageContainer: {
         flex: 1,
         alignItems: 'center',
+        paddingBottom: 16,
+        marginHorizontal: 30,
+        marginBottom: 0,
     },
     coverImage: {
         width: '100%',
         height: Dimensions.get('screen').width * 0.5,
+    },
+    movieTitle: {
+        color: Colors.white,
     },
     loaderContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         paddingVertical: 30,
+    },
+    helperTextContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    helperText: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: Colors.white,
     },
 });
