@@ -34,7 +34,7 @@ const Router = () => {
             <Switch>
                 <Route path="/login" component={LoginPage} />
                 <Route exact path="/movies" component={MoviesPage} />
-                <Route path="/movies/:movieId" component={MovieDetails} />
+                <Route path="/movies/details" component={MovieDetails} />
             </Switch>
         </NativeRouter>
     );
