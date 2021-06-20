@@ -11,9 +11,9 @@ import {
     HelperText,
     Colors,
     useTheme,
+    ProgressBar,
 } from 'react-native-paper';
 import { useHistory } from 'react-router-native';
-import { Bar } from 'react-native-progress';
 import { loginWithCredentials } from '../../application/authentication/login/login_actions';
 import { loginActions } from '../../application/authentication/login/login_slice';
 import {
@@ -69,7 +69,11 @@ const LoginPage = () => {
     }
 
     return (
-        <View style={{ ...styles.container, backgroundColor: colors.backdrop }}>
+        <View
+            style={{
+                ...styles.container,
+                backgroundColor: colors.backdrop,
+            }}>
             <TextInput
                 style={styles.textInput}
                 onChange={usernameInputHandler}
@@ -96,7 +100,7 @@ const LoginPage = () => {
                 Entrar
             </Button>
             {/* Set width to null to use all the available space */}
-            {isSubmitting && <Bar progress={0.3} width={null} />}
+            {isSubmitting && <ProgressBar progress={0.3} />}
             {authFailureOrData instanceof AuthFailure && (
                 <HelperText
                     style={styles.helperText}
