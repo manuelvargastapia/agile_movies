@@ -105,11 +105,13 @@ export async function getMovieActors(token: Token, movieId: MovieId) {
         if (status === 200) {
             const actors: Actor[] = [];
 
+            const imageBaseUrl = data.imageBaseUrl;
+
             data.data.forEach((rawActor: any) => {
                 actors.push(
                     new Actor(
                         rawActor.name,
-                        `${rawActor.imageBaseUrl}${rawActor.profile_path}`,
+                        `${imageBaseUrl}${rawActor.profile_path}`,
                     ),
                 );
             });
