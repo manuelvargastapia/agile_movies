@@ -44,8 +44,7 @@ const styles = StyleSheet.create({
         marginBottom: 0,
     },
     coverImage: {
-        width: '100%',
-        height: Dimensions.get('screen').width * 0.5,
+        height: Dimensions.get('screen').height * 0.25,
     },
     movieTitle: {
         color: Colors.white,

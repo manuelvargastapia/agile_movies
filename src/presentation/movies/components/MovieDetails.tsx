@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { Dimensions, Image, ScrollView, StyleSheet, View } from 'react-native';
 import { Colors, Headline, Paragraph, useTheme } from 'react-native-paper';
-import Carousel from 'react-native-snap-carousel';
 import { useLocation } from 'react-router-native';
 import { loginWithRefreshToken } from '../../../application/authentication/login/login_actions';
 import { useAppDispatch, useAppSelector } from '../../../application/hooks';
@@ -16,10 +15,9 @@ import {
 } from '../../../domain/movies/movie_failures';
 import ErrorMessage from '../../core/components/ErrorMessage';
 import Loader from '../../core/components/Loader';
+import SnapCarousel from '../../core/components/SnapCarousel';
 import ActorItem from './ActorItem';
 import Header from './Header';
-
-const screenWidth = Dimensions.get('screen').width;
 
 const MovieDetails = () => {
     const { colors } = useTheme();
@@ -47,12 +45,8 @@ const MovieDetails = () => {
         dispatch(fetchMovieActors(token, movieId.value));
     }, [token, dispatch, movieId.value]);
 
-    function renderItem({ item, index }: { item: Actor; index: number }) {
+    function renderItem(item: Actor, index: number) {
         return <ActorItem key={index} item={item} />;
-    }
-
-    function keyExtractor(_: Actor, index: number) {
-        return index.toString();
     }
 
     return (
@@ -83,19 +77,9 @@ const MovieDetails = () => {
                             message={actorFailureOrData.message}
                         />
                     ) : (
-                        <Carousel
+                        <SnapCarousel
                             data={actorFailureOrData}
                             renderItem={renderItem}
-                            sliderWidth={screenWidth}
-                            itemWidth={screenWidth / 2}
-                            inactiveSlideOpacity={0.4}
-                            keyExtractor={keyExtractor}
-                            // This component requires some specific settings
-                            // to try to flatten its performance issues.
-                            // However, it's advised to consider alternatives
-                            // or a custom solution
-                            enableMomentum
-                            decelerationRate={0.9}
                         />
                     )}
 
@@ -112,18 +96,9 @@ const styles = StyleSheet.create({
     contentContainer: {
         alignItems: 'center',
         paddingTop: 16,
-        paddingHorizontal: 16,
     },
     movieCoverImage: {
         height: Dimensions.get('screen').height * 0.3,
-    },
-    movieBannerImage: {
-        width: screenWidth * 0.3,
-        height: Dimensions.get('screen').height * 0.3,
-    },
-    overview: {
-        flex: 1,
-        flexDirection: 'row',
     },
     title: {
         color: Colors.white,
@@ -135,6 +110,7 @@ const styles = StyleSheet.create({
         textAlign: 'justify',
         fontSize: 16,
         paddingBottom: 16,
+        paddingHorizontal: 16,
     },
     cast: {
         color: Colors.white,

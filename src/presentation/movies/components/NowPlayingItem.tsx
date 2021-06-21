@@ -33,6 +33,6 @@ export default NowPlayingItem;
 
 const styles = StyleSheet.create({
     bannerImage: {
-        height: Dimensions.get('screen').width * 0.6,
+        height: Dimensions.get('screen').height * 0.25,
     },
 });
