@@ -48,33 +48,43 @@ export async function getMovies(
 
             const imageBaseUrl = data.imageBaseUrl;
 
-            data.data.forEach((rawMovie: any) => {
+            const pushNowPlaying = (rawMovie: any) => {
                 movies.push(
-                    movieAPI === MovieAPI.NOW_PLAYING
-                        ? new NowPlayingMovie(
-                              new MovieId(rawMovie.id),
-                              new MovieCoverUrl(
-                                  `${imageBaseUrl}${rawMovie.backdrop_path}`,
-                              ),
-                              new MovieBannerUrl(
-                                  `${imageBaseUrl}${rawMovie.poster_path}`,
-                              ),
-                              new MovieTitle(rawMovie.title),
-                              new MovieOverview(rawMovie.overview),
-                          )
-                        : new PopularMovie(
-                              new MovieId(rawMovie.id),
-                              new MovieCoverUrl(
-                                  `${imageBaseUrl}${rawMovie.backdrop_path}`,
-                              ),
-                              new MovieBannerUrl(
-                                  `${imageBaseUrl}${rawMovie.poster_path}`,
-                              ),
-                              new MovieTitle(rawMovie.title),
-                              new MovieOverview(rawMovie.overview),
-                          ),
+                    new NowPlayingMovie(
+                        new MovieId(rawMovie.id),
+                        new MovieCoverUrl(
+                            `${imageBaseUrl}${rawMovie.backdrop_path}`,
+                        ),
+                        new MovieBannerUrl(
+                            `${imageBaseUrl}${rawMovie.poster_path}`,
+                        ),
+                        new MovieTitle(rawMovie.title),
+                        new MovieOverview(rawMovie.overview),
+                    ),
                 );
-            });
+            };
+
+            const pushPopular = (rawMovie: any) => {
+                movies.push(
+                    new PopularMovie(
+                        new MovieId(rawMovie.id),
+                        new MovieCoverUrl(
+                            `${imageBaseUrl}${rawMovie.backdrop_path}`,
+                        ),
+                        new MovieBannerUrl(
+                            `${imageBaseUrl}${rawMovie.poster_path}`,
+                        ),
+                        new MovieTitle(rawMovie.title),
+                        new MovieOverview(rawMovie.overview),
+                    ),
+                );
+            };
+
+            data.data.forEach(
+                movieAPI === MovieAPI.NOW_PLAYING
+                    ? pushNowPlaying
+                    : pushPopular,
+            );
 
             return movies;
         }
@@ -94,6 +104,10 @@ export async function getMovies(
 
 export async function getMovieActors(token: Token, movieId: MovieId) {
     try {
+        if (!token.isValid()) {
+            return new ServerError(500, 'Something wrong happened');
+        }
+
         const { status, data } = await axiosInstance({
             method: 'GET',
             url: `/api/movies/${movieId.value}/actors`,
