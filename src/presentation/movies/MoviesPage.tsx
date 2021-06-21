@@ -86,10 +86,10 @@ export default MoviesPage;
 
 const styles = StyleSheet.create({
     nowPlayingContainer: {
-        flex: 0.45,
+        flex: 1,
     },
     popularContainer: {
-        flex: 0.55,
+        flex: 1,
     },
     title: {
         fontSize: 20,
