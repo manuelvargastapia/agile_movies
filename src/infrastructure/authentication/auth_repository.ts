@@ -34,23 +34,23 @@ export async function login(
             );
         }
 
-        return new ServerError(500, 'Something wrong happened');
+        return new ServerError('Something wrong happened', 500);
     } catch (error) {
         if (error.response.status === 400) {
             return new InvalidCredentials(
-                error.response.status,
                 error.response.data.message,
+                error.response.status,
             );
         }
 
         if (error.response.status === 401) {
             return new TokenExpired(
-                error.response.status,
                 error.response.data.message,
+                error.response.status,
             );
         }
 
-        return new ServerError(500, 'Something wrong happened');
+        return new ServerError('Something wrong happened', 500);
     }
 }
 
@@ -58,23 +58,26 @@ export async function refreshToken(
     token: RefreshToken,
 ): Promise<AuthFailure | AuthData> {
     try {
+        if (!token.isValid()) {
+            return new ServerError('Something wrong happened', 500);
+        }
+
         const { status, data } = await axiosInstance({
             method: 'POST',
             url: '/api/auth/refresh',
             data: {
-                refresh_token: token.value,
+                refresh_token: token.getOrCrash(),
             },
         });
 
         if (status === 201) {
-            return new AuthData(
-                new Token(data.data.payload.token),
-                new RefreshToken(''),
-            );
+            // We create a new instance but keeping the original refresh token
+            // for further refreshes
+            return new AuthData(new Token(data.data.payload.token), token);
         }
 
-        return new ServerError(500, 'Something wrong happened');
+        return new ServerError('Something wrong happened', 500);
     } catch (error) {
-        return new ServerError(500, 'Something wrong happened');
+        return new ServerError('Something wrong happened', 500);
     }
 }

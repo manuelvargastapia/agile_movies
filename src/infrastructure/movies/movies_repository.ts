@@ -28,55 +28,69 @@ export async function getMovies(
     movieAPI: MovieAPI,
 ): Promise<MovieFailure | IMovie[]> {
     try {
+        if (!token.isValid()) {
+            return new ServerError(500, 'Something wrong happened');
+        }
+
         const apiUrl =
-            movieAPI === MovieAPI.NOW_PLAYING ? '/now_playing' : 'popular';
+            movieAPI === MovieAPI.NOW_PLAYING ? '/now_playing' : '/popular';
 
         const { status, data } = await axiosInstance({
             method: 'GET',
             url: `/api/movies${apiUrl}?page=${pageNumber}`,
             headers: {
-                Authorization: `Bearer ${token.value}`,
+                Authorization: `Bearer ${token.getOrCrash()}`,
             },
         });
 
         if (status === 200) {
             const movies: IMovie[] = [];
 
-            data.data.forEach((rawMovie: any) => {
+            const imageBaseUrl = data.imageBaseUrl;
+
+            const pushNowPlaying = (rawMovie: any) => {
                 movies.push(
-                    movieAPI === MovieAPI.NOW_PLAYING
-                        ? new NowPlayingMovie(
-                              new MovieId(rawMovie.id),
-                              new MovieCoverUrl(
-                                  `${rawMovie.imageBaseUrl}${rawMovie.backdrop_path}`,
-                              ),
-                              new MovieBannerUrl(
-                                  `${rawMovie.imageBaseUrl}${rawMovie.poster_path}`,
-                              ),
-                              new MovieTitle(rawMovie.title),
-                              new MovieOverview(rawMovie.overview),
-                          )
-                        : new PopularMovie(
-                              new MovieId(rawMovie.id),
-                              new MovieCoverUrl(
-                                  `${rawMovie.imageBaseUrl}${rawMovie.backdrop_path}`,
-                              ),
-                              new MovieBannerUrl(
-                                  `${rawMovie.imageBaseUrl}${rawMovie.poster_path}`,
-                              ),
-                              new MovieTitle(rawMovie.title),
-                              new MovieOverview(rawMovie.overview),
-                          ),
+                    new NowPlayingMovie(
+                        new MovieId(rawMovie.id),
+                        new MovieCoverUrl(
+                            `${imageBaseUrl}${rawMovie.backdrop_path}`,
+                        ),
+                        new MovieBannerUrl(
+                            `${imageBaseUrl}${rawMovie.poster_path}`,
+                        ),
+                        new MovieTitle(rawMovie.title),
+                        new MovieOverview(rawMovie.overview),
+                    ),
                 );
-            });
+            };
+
+            const pushPopular = (rawMovie: any) => {
+                movies.push(
+                    new PopularMovie(
+                        new MovieId(rawMovie.id),
+                        new MovieCoverUrl(
+                            `${imageBaseUrl}${rawMovie.backdrop_path}`,
+                        ),
+                        new MovieBannerUrl(
+                            `${imageBaseUrl}${rawMovie.poster_path}`,
+                        ),
+                        new MovieTitle(rawMovie.title),
+                        new MovieOverview(rawMovie.overview),
+                    ),
+                );
+            };
+
+            data.data.forEach(
+                movieAPI === MovieAPI.NOW_PLAYING
+                    ? pushNowPlaying
+                    : pushPopular,
+            );
 
             return movies;
         }
 
         return new ServerError(500, 'Something wrong happened');
     } catch (error) {
-        console.log(error);
-
         if (error.response.status === 401) {
             return new TokenExpired(
                 error.response.status,
@@ -90,6 +104,10 @@ export async function getMovies(
 
 export async function getMovieActors(token: Token, movieId: MovieId) {
     try {
+        if (!token.isValid()) {
+            return new ServerError(500, 'Something wrong happened');
+        }
+
         const { status, data } = await axiosInstance({
             method: 'GET',
             url: `/api/movies/${movieId.value}/actors`,
@@ -101,11 +119,13 @@ export async function getMovieActors(token: Token, movieId: MovieId) {
         if (status === 200) {
             const actors: Actor[] = [];
 
+            const imageBaseUrl = data.imageBaseUrl;
+
             data.data.forEach((rawActor: any) => {
                 actors.push(
                     new Actor(
                         rawActor.name,
-                        `${rawActor.imageBaseUrl}${rawActor.profile_path}`,
+                        `${imageBaseUrl}${rawActor.profile_path}`,
                     ),
                 );
             });

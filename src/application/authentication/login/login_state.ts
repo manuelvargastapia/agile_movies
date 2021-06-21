@@ -7,6 +7,5 @@ export interface LoginState {
     username: Username;
     password: Password;
     isSubmitting: boolean;
-    tokenExpired: boolean;
     authFailureOrData: AuthFailure | AuthData;
 }
