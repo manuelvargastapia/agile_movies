@@ -1,6 +1,4 @@
 import React from 'react';
-import { Dimensions } from 'react-native';
-import Carousel from 'react-native-snap-carousel';
 import { useTheme } from 'react-native-paper';
 import { AuthData } from '../../../domain/authentication/auth_data';
 import {
@@ -17,8 +15,7 @@ import { nowPlayingActions } from '../../../application/movies/movies/movies_sli
 import useMovieFetching from '../../core/hooks/useMovieFetching';
 import { useAppSelector } from '../../../application/hooks';
 import { fetchNowPlayingMovies } from '../../../application/movies/movies/movies_actions';
-
-const screenWidth = Dimensions.get('screen').width;
+import SnapCarousel from '../../core/components/SnapCarousel';
 
 const NowPlayingList: React.FC<{ authData: AuthData }> = ({ authData }) => {
     const { colors } = useTheme();
@@ -40,7 +37,7 @@ const NowPlayingList: React.FC<{ authData: AuthData }> = ({ authData }) => {
         dispatch(nowPlayingActions.incrementPageNumber());
     }
 
-    function renderItem({ item }: { item: NowPlayingMovie }) {
+    function renderItem(item: NowPlayingMovie, _: number) {
         return (
             <NowPlayingItem
                 key={item.movieId.value}
@@ -50,13 +47,9 @@ const NowPlayingList: React.FC<{ authData: AuthData }> = ({ authData }) => {
         );
     }
 
-    function keyExtractor(_: NowPlayingMovie, index: number) {
-        return index.toString();
-    }
-
-    function listFooterComponent() {
-        return <Loader color={colors.accent} visible={isFetching} />;
-    }
+    const ListFooterComponent = (
+        <Loader color={colors.accent} visible={isFetching} />
+    );
 
     return (
         <>
@@ -66,19 +59,19 @@ const NowPlayingList: React.FC<{ authData: AuthData }> = ({ authData }) => {
                     message={movieFailureOrData.message}
                 />
             ) : (
-                <Carousel
-                    data={movieFailureOrData}
-                    renderItem={renderItem}
-                    sliderWidth={screenWidth}
-                    itemWidth={screenWidth * 0.4}
-                    inactiveSlideOpacity={0.4}
-                    onEndReachedThreshold={0.1}
-                    onEndReached={onEndReached}
-                    ListFooterComponent={listFooterComponent}
-                    keyExtractor={keyExtractor}
-                    enableMomentum
-                    decelerationRate={0.9}
-                />
+                <>
+                    {isFetching &&
+                        movieFailureOrData.length === 0 &&
+                        ListFooterComponent}
+                    {movieFailureOrData.length > 0 && (
+                        <SnapCarousel
+                            data={movieFailureOrData}
+                            renderItem={renderItem}
+                            onEndReached={onEndReached}
+                            ListFooterComponent={ListFooterComponent}
+                        />
+                    )}
+                </>
             )}
         </>
     );
