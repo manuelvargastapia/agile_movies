@@ -1,15 +1,6 @@
 import React from 'react';
 import { useEffect } from 'react';
-import {
-    ActivityIndicator,
-    Dimensions,
-    FlatList,
-    Image,
-    StyleSheet,
-    Text,
-    TouchableHighlight,
-    View,
-} from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
 import { Colors, HelperText, useTheme } from 'react-native-paper';
 import { useHistory } from 'react-router-native';
 import { loginWithRefreshToken } from '../../../application/authentication/login/login_actions';
@@ -22,6 +13,7 @@ import {
     ServerError,
 } from '../../../domain/movies/movie_failures';
 import { PopularMovie } from '../../../domain/movies/popular';
+import PopularItem from './PopularItem';
 
 const PopularList: React.FC<{ authData: AuthData }> = ({ authData }) => {
     const { colors } = useTheme();
@@ -62,21 +54,16 @@ const PopularList: React.FC<{ authData: AuthData }> = ({ authData }) => {
 
     function renderItem({ item }: { item: PopularMovie }) {
         return (
-            <View style={styles.converImageContainer}>
-                <TouchableHighlight
-                    onPress={onSelectMovie.bind(null, item)}
-                    underlayColor={colors.accent}>
-                    <Image
-                        style={styles.coverImage}
-                        resizeMode="contain"
-                        source={{
-                            uri: item.movieBannerUrl.value,
-                        }}
-                    />
-                </TouchableHighlight>
-                <Text style={styles.movieTitle}>{item.movieTitle.value}</Text>
-            </View>
+            <PopularItem
+                key={item.movieId.value}
+                item={item}
+                onSelectMovie={onSelectMovie}
+            />
         );
+    }
+
+    function keyExtractor(_: PopularMovie, index: number) {
+        return index.toString();
     }
 
     function listFooterComponent() {
@@ -108,16 +95,14 @@ const PopularList: React.FC<{ authData: AuthData }> = ({ authData }) => {
                     </HelperText>
                 </View>
             ) : (
-                movieFailureOrData.length > 0 && (
-                    <FlatList
-                        data={movieFailureOrData}
-                        renderItem={renderItem}
-                        numColumns={2}
-                        onEndReached={onEndReached}
-                        ListFooterComponent={listFooterComponent}
-                        keyExtractor={(_, index) => index.toString()}
-                    />
-                )
+                <FlatList
+                    data={movieFailureOrData}
+                    renderItem={renderItem}
+                    numColumns={2}
+                    onEndReached={onEndReached}
+                    ListFooterComponent={listFooterComponent}
+                    keyExtractor={keyExtractor}
+                />
             )}
         </>
     );
@@ -126,20 +111,6 @@ const PopularList: React.FC<{ authData: AuthData }> = ({ authData }) => {
 export default PopularList;
 
 const styles = StyleSheet.create({
-    converImageContainer: {
-        flex: 1,
-        paddingBottom: 16,
-        marginHorizontal: 30,
-        marginBottom: 0,
-    },
-    coverImage: {
-        width: '100%',
-        height: Dimensions.get('screen').width * 0.5,
-    },
-    movieTitle: {
-        color: Colors.white,
-        textAlign: 'center',
-    },
     loaderContainer: {
         flex: 1,
         justifyContent: 'center',

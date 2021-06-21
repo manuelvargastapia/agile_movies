@@ -4,6 +4,7 @@ import {
     NativeSyntheticEvent,
     TextInputChangeEventData,
     StyleSheet,
+    Image,
 } from 'react-native';
 import {
     TextInput,
@@ -74,6 +75,12 @@ const LoginPage = () => {
                 ...styles.container,
                 backgroundColor: colors.backdrop,
             }}>
+            <View style={styles.logoContainer}>
+                <Image
+                    style={styles.logo}
+                    source={require('../../../assets/logo.png')}
+                />
+            </View>
             <TextInput
                 style={styles.textInput}
                 onChange={usernameInputHandler}
@@ -82,6 +89,7 @@ const LoginPage = () => {
                 error={
                     validationAllowed && username.value instanceof UsernameEmpty
                 }
+                returnKeyType="next"
             />
             <TextInput
                 style={styles.textInput}
@@ -92,6 +100,7 @@ const LoginPage = () => {
                 error={
                     validationAllowed && password.value instanceof PasswordEmpty
                 }
+                returnKeyType="done"
             />
             <Button
                 style={styles.button}
@@ -126,6 +135,12 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         paddingHorizontal: 50,
+    },
+    logoContainer: {
+        alignItems: 'center',
+    },
+    logo: {
+        marginBottom: 64,
     },
     textInput: {
         marginVertical: 8,

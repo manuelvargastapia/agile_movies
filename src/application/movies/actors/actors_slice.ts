@@ -24,6 +24,9 @@ const actorsSlice = createSlice({
             state.actorFailureOrData = action.payload;
             state.tokenExpired = action.payload instanceof TokenExpired;
         },
+        clearActors(state) {
+            state.actorFailureOrData = [];
+        },
     },
 });
 

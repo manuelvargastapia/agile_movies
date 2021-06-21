@@ -1,13 +1,7 @@
 import React, { useEffect } from 'react';
+import { Dimensions, Image, ScrollView, StyleSheet, View } from 'react-native';
 import {
-    Dimensions,
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
-} from 'react-native';
-import {
+    ActivityIndicator,
     Colors,
     Headline,
     HelperText,
@@ -19,6 +13,7 @@ import { useLocation } from 'react-router-native';
 import { loginWithRefreshToken } from '../../../application/authentication/login/login_actions';
 import { useAppDispatch, useAppSelector } from '../../../application/hooks';
 import { fetchMovieActors } from '../../../application/movies/actors/actors_actions';
+import { actorsActions } from '../../../application/movies/actors/actors_slice';
 import { AuthData } from '../../../domain/authentication/auth_data';
 import { Actor } from '../../../domain/movies/actor';
 import { IMovie } from '../../../domain/movies/i_movie';
@@ -26,6 +21,7 @@ import {
     MovieFailure,
     ServerError,
 } from '../../../domain/movies/movie_failures';
+import ActorItem from './ActorItem';
 import Header from './Header';
 
 const screenWidth = Dimensions.get('screen').width;
@@ -41,7 +37,7 @@ const MovieDetails = () => {
 
     const { userFailureOrData } = useAppSelector(({ userInfo }) => userInfo);
 
-    const { actorFailureOrData, tokenExpired } = useAppSelector(
+    const { isFetching, actorFailureOrData, tokenExpired } = useAppSelector(
         ({ actors }) => actors,
     );
 
@@ -54,22 +50,17 @@ const MovieDetails = () => {
     }, [refreshToken, dispatch, tokenExpired]);
 
     useEffect(() => {
+        // Prevent showing temporary previous data
+        dispatch(actorsActions.clearActors());
         dispatch(fetchMovieActors(token, movieId.value));
     }, [token, dispatch, movieId.value]);
 
     function renderItem({ item }: { item: Actor }) {
-        return (
-            <View style={styles.actorPictureContainer}>
-                <Image
-                    style={styles.actorPicture}
-                    resizeMode="contain"
-                    source={{
-                        uri: item.profileImageUrl,
-                    }}
-                />
-                <Text style={styles.actorName}>{item.name}</Text>
-            </View>
-        );
+        return <ActorItem key={item.name} item={item} />;
+    }
+
+    function keyExtractor(_: Actor, index: number) {
+        return index.toString();
     }
 
     return (
@@ -104,18 +95,25 @@ const MovieDetails = () => {
                             </HelperText>
                         </View>
                     ) : (
-                        actorFailureOrData.length > 0 && (
-                            <Carousel
-                                data={actorFailureOrData}
-                                renderItem={renderItem}
-                                sliderWidth={screenWidth}
-                                itemWidth={screenWidth / 2}
-                                inactiveSlideOpacity={0.4}
-                                keyExtractor={(_, index) => index.toString()}
-                                enableMomentum
-                                decelerationRate={0.9}
+                        <Carousel
+                            data={actorFailureOrData}
+                            renderItem={renderItem}
+                            sliderWidth={screenWidth}
+                            itemWidth={screenWidth / 2}
+                            inactiveSlideOpacity={0.4}
+                            keyExtractor={keyExtractor}
+                            enableMomentum
+                            decelerationRate={0.9}
+                        />
+                    )}
+                    {isFetching && (
+                        <View style={styles.loaderContainer}>
+                            <ActivityIndicator
+                                size={50}
+                                animating={true}
+                                color={colors.accent}
                             />
-                        )
+                        </View>
                     )}
                 </View>
             </ScrollView>
@@ -158,20 +156,6 @@ const styles = StyleSheet.create({
         paddingBottom: 16,
         fontSize: 20,
     },
-    actorPictureContainer: {
-        flex: 1,
-        alignItems: 'center',
-        paddingBottom: 16,
-        marginHorizontal: 30,
-        marginBottom: 0,
-    },
-    actorPicture: {
-        width: '100%',
-        height: screenWidth * 0.5,
-    },
-    actorName: {
-        color: Colors.white,
-    },
     helperTextContainer: {
         flex: 1,
         justifyContent: 'center',
@@ -181,5 +165,11 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: 'bold',
         color: Colors.white,
+    },
+    loaderContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: 30,
     },
 });

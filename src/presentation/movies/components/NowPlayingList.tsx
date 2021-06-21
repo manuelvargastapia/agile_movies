@@ -1,12 +1,5 @@
 import React, { useEffect } from 'react';
-import {
-    ActivityIndicator,
-    Dimensions,
-    Image,
-    StyleSheet,
-    TouchableHighlight,
-    View,
-} from 'react-native';
+import { ActivityIndicator, Dimensions, StyleSheet, View } from 'react-native';
 import Carousel from 'react-native-snap-carousel';
 import { AuthData } from '../../../domain/authentication/auth_data';
 import { fetchNowPlayingMovies } from '../../../application/movies/now_playing/now_playing_actions';
@@ -19,6 +12,7 @@ import { useAppDispatch, useAppSelector } from '../../../application/hooks';
 import { loginWithRefreshToken } from '../../../application/authentication/login/login_actions';
 import { nowPlayingActions } from '../../../application/movies/now_playing/now_playing_slice';
 import { Colors, HelperText, useTheme } from 'react-native-paper';
+import NowPlayingItem from './NowPlayingItem';
 import { useHistory } from 'react-router-native';
 
 const screenWidth = Dimensions.get('screen').width;
@@ -62,18 +56,16 @@ const NowPlayingList: React.FC<{ authData: AuthData }> = ({ authData }) => {
 
     function renderItem({ item }: { item: NowPlayingMovie }) {
         return (
-            <TouchableHighlight
-                onPress={onSelectMovie.bind(null, item)}
-                underlayColor={colors.accent}>
-                <Image
-                    style={styles.bannerImage}
-                    resizeMode="contain"
-                    source={{
-                        uri: item.movieBannerUrl.value,
-                    }}
-                />
-            </TouchableHighlight>
+            <NowPlayingItem
+                key={item.movieId.value}
+                item={item}
+                onSelectMovie={onSelectMovie}
+            />
         );
+    }
+
+    function keyExtractor(_: NowPlayingMovie, index: number) {
+        return index.toString();
     }
 
     function listFooterComponent() {
@@ -105,21 +97,19 @@ const NowPlayingList: React.FC<{ authData: AuthData }> = ({ authData }) => {
                     </HelperText>
                 </View>
             ) : (
-                movieFailureOrData.length > 0 && (
-                    <Carousel
-                        data={movieFailureOrData}
-                        renderItem={renderItem}
-                        sliderWidth={screenWidth}
-                        itemWidth={screenWidth * 0.4}
-                        inactiveSlideOpacity={0.4}
-                        onEndReachedThreshold={0.1}
-                        onEndReached={onEndReached}
-                        ListFooterComponent={listFooterComponent}
-                        keyExtractor={(_, index) => index.toString()}
-                        enableMomentum
-                        decelerationRate={0.9}
-                    />
-                )
+                <Carousel
+                    data={movieFailureOrData}
+                    renderItem={renderItem}
+                    sliderWidth={screenWidth}
+                    itemWidth={screenWidth * 0.4}
+                    inactiveSlideOpacity={0.4}
+                    onEndReachedThreshold={0.1}
+                    onEndReached={onEndReached}
+                    ListFooterComponent={listFooterComponent}
+                    keyExtractor={keyExtractor}
+                    enableMomentum
+                    decelerationRate={0.9}
+                />
             )}
         </>
     );
@@ -128,9 +118,6 @@ const NowPlayingList: React.FC<{ authData: AuthData }> = ({ authData }) => {
 export default NowPlayingList;
 
 const styles = StyleSheet.create({
-    bannerImage: {
-        height: screenWidth * 0.6,
-    },
     loaderContainer: {
         flex: 1,
         justifyContent: 'center',
