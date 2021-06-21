@@ -1,51 +1,36 @@
 import React from 'react';
-import { useEffect } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
-import { Colors, HelperText, useTheme } from 'react-native-paper';
-import { useHistory } from 'react-router-native';
-import { loginWithRefreshToken } from '../../../application/authentication/login/login_actions';
-import { useAppDispatch, useAppSelector } from '../../../application/hooks';
-import { fetchPopularMovies } from '../../../application/movies/popular/popular_actions';
-import { popularActions } from '../../../application/movies/popular/popular_slice';
+import { FlatList } from 'react-native';
+import { useTheme } from 'react-native-paper';
 import { AuthData } from '../../../domain/authentication/auth_data';
 import {
     MovieFailure,
     ServerError,
 } from '../../../domain/movies/movie_failures';
+import { useAppSelector } from '../../../application/hooks';
+import { useHistory } from 'react-router-native';
+import ErrorMessage from '../../core/components/ErrorMessage';
+import Loader from '../../core/components/Loader';
+import { Paths } from '../../core/enums/router_paths';
+import { popularActions } from '../../../application/movies/movies/movies_slice';
+import { fetchPopularMovies } from '../../../application/movies/movies/movies_actions';
 import { PopularMovie } from '../../../domain/movies/popular';
 import PopularItem from './PopularItem';
+import useMovieFetching from '../../core/hooks/useMovieFetching';
 
 const PopularList: React.FC<{ authData: AuthData }> = ({ authData }) => {
     const { colors } = useTheme();
-
     const history = useHistory();
 
-    const {
-        isFetching,
-        movieFailureOrData,
-        pageNumber,
-        lastPageNumber,
-        tokenExpired,
-    } = useAppSelector(({ popular }) => popular);
-
-    const fetchingAllowed = pageNumber !== lastPageNumber;
-
-    const dispatch = useAppDispatch();
-
-    useEffect(() => {
-        if (tokenExpired) {
-            dispatch(loginWithRefreshToken(authData.refreshToken));
-        }
-    }, [authData.refreshToken, dispatch, tokenExpired]);
-
-    useEffect(() => {
-        if (fetchingAllowed) {
-            dispatch(fetchPopularMovies(authData.token, pageNumber));
-        }
-    }, [authData.token, dispatch, fetchingAllowed, pageNumber]);
+    // PopularList and NowPlayingList are very similar, so we're using a common
+    // custom hook to help to reduce the code duplication
+    const { isFetching, movieFailureOrData, dispatch } = useMovieFetching(
+        authData,
+        useAppSelector(({ popular }) => popular),
+        fetchPopularMovies,
+    );
 
     function onSelectMovie(movie: PopularMovie) {
-        history.push('/movies/details', { movie, authData });
+        history.push(Paths.movieDetails, { movie, authData });
     }
 
     function onEndReached() {
@@ -57,7 +42,7 @@ const PopularList: React.FC<{ authData: AuthData }> = ({ authData }) => {
             <PopularItem
                 key={item.movieId.value}
                 item={item}
-                onSelectMovie={onSelectMovie}
+                onSelectItem={onSelectMovie}
             />
         );
     }
@@ -67,33 +52,16 @@ const PopularList: React.FC<{ authData: AuthData }> = ({ authData }) => {
     }
 
     function listFooterComponent() {
-        return (
-            <>
-                {isFetching && (
-                    <View style={styles.loaderContainer}>
-                        <ActivityIndicator
-                            size={50}
-                            animating={true}
-                            color={colors.accent}
-                        />
-                    </View>
-                )}
-            </>
-        );
+        return <Loader color={colors.accent} visible={isFetching} />;
     }
 
     return (
         <>
             {movieFailureOrData instanceof MovieFailure ? (
-                <View style={styles.helperTextContainer}>
-                    <HelperText
-                        style={styles.helperText}
-                        type="error"
-                        visible={movieFailureOrData instanceof ServerError}
-                        padding="none">
-                        {movieFailureOrData.message}
-                    </HelperText>
-                </View>
+                <ErrorMessage
+                    visible={movieFailureOrData instanceof ServerError}
+                    message={movieFailureOrData.message}
+                />
             ) : (
                 <FlatList
                     data={movieFailureOrData}
@@ -109,22 +77,3 @@ const PopularList: React.FC<{ authData: AuthData }> = ({ authData }) => {
 };
 
 export default PopularList;
-
-const styles = StyleSheet.create({
-    loaderContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingVertical: 30,
-    },
-    helperTextContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    helperText: {
-        fontSize: 14,
-        fontWeight: 'bold',
-        color: Colors.white,
-    },
-});

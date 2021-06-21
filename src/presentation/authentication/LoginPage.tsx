@@ -9,10 +9,10 @@ import {
 import {
     TextInput,
     Button,
-    HelperText,
-    Colors,
     useTheme,
     ProgressBar,
+    HelperText,
+    Colors,
 } from 'react-native-paper';
 import { useHistory } from 'react-router-native';
 import { loginWithCredentials } from '../../application/authentication/login/login_actions';
@@ -25,23 +25,22 @@ import {
 } from '../../domain/authentication/auth_failures';
 import { useAppDispatch, useAppSelector } from '../../application/hooks';
 import { PasswordEmpty, UsernameEmpty } from '../../domain/core/value_failures';
+import { Paths } from '../core/enums/router_paths';
 
 const LoginPage = () => {
-    // Prevent showing error styles before first submition
+    const { colors } = useTheme();
+    const history = useHistory();
+
+    // Prevent showing error styles in TextInput's before first submition
     const [validationAllowed, setValidationAllowed] = useState(false);
 
-    const { colors } = useTheme();
-
+    const dispatch = useAppDispatch();
     const { isLoggedIn, username, password, isSubmitting, authFailureOrData } =
         useAppSelector(({ login }) => login);
 
-    const dispatch = useAppDispatch();
-
-    const history = useHistory();
-
     useEffect(() => {
         if (isLoggedIn) {
-            history.replace('/movies');
+            history.replace(Paths.movies);
         }
     }, [history, isLoggedIn]);
 
@@ -59,6 +58,7 @@ const LoginPage = () => {
 
     function submitHandler() {
         setValidationAllowed(true);
+
         if (username.isValid() && password.isValid()) {
             dispatch(
                 loginWithCredentials(
@@ -81,6 +81,7 @@ const LoginPage = () => {
                     source={require('../../../assets/logo.png')}
                 />
             </View>
+
             <TextInput
                 style={styles.textInput}
                 onChange={usernameInputHandler}
@@ -108,8 +109,9 @@ const LoginPage = () => {
                 mode="contained">
                 Entrar
             </Button>
-            {/* Set width to null to use all the available space */}
+
             {isSubmitting && <ProgressBar progress={0.3} />}
+
             {authFailureOrData instanceof AuthFailure && (
                 <HelperText
                     style={styles.helperText}

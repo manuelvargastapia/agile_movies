@@ -1,13 +1,6 @@
 import React, { useEffect } from 'react';
 import { Dimensions, Image, ScrollView, StyleSheet, View } from 'react-native';
-import {
-    ActivityIndicator,
-    Colors,
-    Headline,
-    HelperText,
-    Paragraph,
-    useTheme,
-} from 'react-native-paper';
+import { Colors, Headline, Paragraph, useTheme } from 'react-native-paper';
 import Carousel from 'react-native-snap-carousel';
 import { useLocation } from 'react-router-native';
 import { loginWithRefreshToken } from '../../../application/authentication/login/login_actions';
@@ -21,6 +14,8 @@ import {
     MovieFailure,
     ServerError,
 } from '../../../domain/movies/movie_failures';
+import ErrorMessage from '../../core/components/ErrorMessage';
+import Loader from '../../core/components/Loader';
 import ActorItem from './ActorItem';
 import Header from './Header';
 
@@ -29,19 +24,16 @@ const screenWidth = Dimensions.get('screen').width;
 const MovieDetails = () => {
     const { colors } = useTheme();
 
+    // Extracting the state coming from MoviesPage
     const { state } = useLocation<{ movie: IMovie; authData: AuthData }>();
-
     const { movieId, movieCoverUrl, movieTitle, movieOverview } = state.movie;
-
     const { token, refreshToken } = state.authData;
 
+    const dispatch = useAppDispatch();
     const { userFailureOrData } = useAppSelector(({ userInfo }) => userInfo);
-
     const { isFetching, actorFailureOrData, tokenExpired } = useAppSelector(
         ({ actors }) => actors,
     );
-
-    const dispatch = useAppDispatch();
 
     useEffect(() => {
         if (tokenExpired) {
@@ -50,13 +42,13 @@ const MovieDetails = () => {
     }, [refreshToken, dispatch, tokenExpired]);
 
     useEffect(() => {
-        // Prevent showing temporary previous data
+        // Prevent showing previous data
         dispatch(actorsActions.clearActors());
         dispatch(fetchMovieActors(token, movieId.value));
     }, [token, dispatch, movieId.value]);
 
-    function renderItem({ item }: { item: Actor }) {
-        return <ActorItem key={item.name} item={item} />;
+    function renderItem({ item, index }: { item: Actor; index: number }) {
+        return <ActorItem key={index} item={item} />;
     }
 
     function keyExtractor(_: Actor, index: number) {
@@ -70,30 +62,26 @@ const MovieDetails = () => {
                 title={movieTitle.value}
                 backAction
             />
+
             <ScrollView style={{ backgroundColor: colors.backdrop }}>
                 <Image
                     style={styles.movieCoverImage}
                     resizeMode="cover"
                     source={{ uri: movieCoverUrl.value }}
                 />
+
                 <View style={styles.contentContainer}>
                     <Headline style={styles.title}>{movieTitle.value}</Headline>
                     <Paragraph style={styles.paragraph}>
                         {movieOverview.value}
                     </Paragraph>
+
                     <Headline style={styles.cast}>Reparto</Headline>
                     {actorFailureOrData instanceof MovieFailure ? (
-                        <View style={styles.helperTextContainer}>
-                            <HelperText
-                                style={styles.helperText}
-                                type="error"
-                                visible={
-                                    actorFailureOrData instanceof ServerError
-                                }
-                                padding="none">
-                                {actorFailureOrData.message}
-                            </HelperText>
-                        </View>
+                        <ErrorMessage
+                            visible={actorFailureOrData instanceof ServerError}
+                            message={actorFailureOrData.message}
+                        />
                     ) : (
                         <Carousel
                             data={actorFailureOrData}
@@ -102,19 +90,16 @@ const MovieDetails = () => {
                             itemWidth={screenWidth / 2}
                             inactiveSlideOpacity={0.4}
                             keyExtractor={keyExtractor}
+                            // This component requires some specific settings
+                            // to try to flatten its performance issues.
+                            // However, it's advised to consider alternatives
+                            // or a custom solution
                             enableMomentum
                             decelerationRate={0.9}
                         />
                     )}
-                    {isFetching && (
-                        <View style={styles.loaderContainer}>
-                            <ActivityIndicator
-                                size={50}
-                                animating={true}
-                                color={colors.accent}
-                            />
-                        </View>
-                    )}
+
+                    <Loader color={colors.accent} visible={isFetching} />
                 </View>
             </ScrollView>
         </>
@@ -155,21 +140,5 @@ const styles = StyleSheet.create({
         color: Colors.white,
         paddingBottom: 16,
         fontSize: 20,
-    },
-    helperTextContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    helperText: {
-        fontSize: 14,
-        fontWeight: 'bold',
-        color: Colors.white,
-    },
-    loaderContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingVertical: 30,
     },
 });

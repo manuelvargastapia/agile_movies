@@ -1,38 +1,26 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Colors, useTheme } from 'react-native-paper';
+import { View, StyleSheet } from 'react-native';
+import { Colors, Headline, useTheme } from 'react-native-paper';
 import { Redirect, useHistory } from 'react-router-native';
 import { loginWithRefreshToken } from '../../application/authentication/login/login_actions';
 import { useAppDispatch, useAppSelector } from '../../application/hooks';
 import { fetchUserInfo } from '../../application/user/user_info/info_actions';
 import { AuthData } from '../../domain/authentication/auth_data';
 import { AuthFailure } from '../../domain/authentication/auth_failures';
+import { Paths } from '../core/enums/router_paths';
 import Header from './components/Header';
 import NowPlayingList from './components/NowPlayingList';
 import PopularList from './components/PopularList';
 
 const MoviesPage = () => {
     const { colors } = useTheme();
-
     const history = useHistory();
 
+    const dispatch = useAppDispatch();
     const { authFailureOrData } = useAppSelector(({ login }) => login);
-
     const { tokenExpired, userFailureOrData } = useAppSelector(
         ({ userInfo }) => userInfo,
     );
-
-    const dispatch = useAppDispatch();
-
-    useEffect(() => {
-        if (tokenExpired) {
-            if (authFailureOrData instanceof AuthData) {
-                dispatch(loginWithRefreshToken(authFailureOrData.refreshToken));
-            } else {
-                history.replace('/login');
-            }
-        }
-    }, [authFailureOrData, dispatch, history, tokenExpired]);
 
     useEffect(() => {
         if (authFailureOrData instanceof AuthData) {
@@ -40,34 +28,52 @@ const MoviesPage = () => {
         }
     }, [authFailureOrData, dispatch]);
 
+    // A token refresh action is triggered each time an API call returns
+    // an error related to a token expired
+    useEffect(() => {
+        if (tokenExpired) {
+            if (authFailureOrData instanceof AuthData) {
+                dispatch(loginWithRefreshToken(authFailureOrData.refreshToken));
+            } else {
+                history.replace(Paths.login);
+            }
+        }
+    }, [authFailureOrData, dispatch, history, tokenExpired]);
+
     return (
         <>
             {/* Virtually, this shouldn't happen, but the case still
             needs to be considered */}
-            {authFailureOrData instanceof AuthFailure ? (
-                <Redirect to="/login" />
-            ) : (
+            {authFailureOrData instanceof AuthFailure && (
+                <Redirect to={Paths.login} />
+            )}
+
+            {authFailureOrData instanceof AuthData && (
                 <>
                     <Header
                         userFailureOrData={userFailureOrData}
                         title="AgileMovies"
                     />
+
                     <View
                         style={{
                             ...styles.nowPlayingContainer,
                             backgroundColor: colors.backdrop,
                         }}>
-                        <Text style={styles.title}>Películas de estreno</Text>
+                        <Headline style={styles.title}>
+                            Películas de estreno
+                        </Headline>
                         <NowPlayingList authData={authFailureOrData} />
                     </View>
+
                     <View
                         style={{
                             ...styles.popularContainer,
                             backgroundColor: colors.backdrop,
                         }}>
-                        <Text style={styles.title}>
+                        <Headline style={styles.title}>
                             Películas más populares
-                        </Text>
+                        </Headline>
                         <PopularList authData={authFailureOrData} />
                     </View>
                 </>

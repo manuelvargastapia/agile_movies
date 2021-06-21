@@ -1,53 +1,39 @@
-import React, { useEffect } from 'react';
-import { ActivityIndicator, Dimensions, StyleSheet, View } from 'react-native';
+import React from 'react';
+import { Dimensions } from 'react-native';
 import Carousel from 'react-native-snap-carousel';
+import { useTheme } from 'react-native-paper';
 import { AuthData } from '../../../domain/authentication/auth_data';
-import { fetchNowPlayingMovies } from '../../../application/movies/now_playing/now_playing_actions';
 import {
     MovieFailure,
     ServerError,
 } from '../../../domain/movies/movie_failures';
 import { NowPlayingMovie } from '../../../domain/movies/now_playing';
-import { useAppDispatch, useAppSelector } from '../../../application/hooks';
-import { loginWithRefreshToken } from '../../../application/authentication/login/login_actions';
-import { nowPlayingActions } from '../../../application/movies/now_playing/now_playing_slice';
-import { Colors, HelperText, useTheme } from 'react-native-paper';
 import NowPlayingItem from './NowPlayingItem';
 import { useHistory } from 'react-router-native';
+import ErrorMessage from '../../core/components/ErrorMessage';
+import Loader from '../../core/components/Loader';
+import { Paths } from '../../core/enums/router_paths';
+import { nowPlayingActions } from '../../../application/movies/movies/movies_slice';
+import useMovieFetching from '../../core/hooks/useMovieFetching';
+import { useAppSelector } from '../../../application/hooks';
+import { fetchNowPlayingMovies } from '../../../application/movies/movies/movies_actions';
 
 const screenWidth = Dimensions.get('screen').width;
 
 const NowPlayingList: React.FC<{ authData: AuthData }> = ({ authData }) => {
     const { colors } = useTheme();
-
     const history = useHistory();
 
-    const {
-        isFetching,
-        pageNumber,
-        lastPageNumber,
-        movieFailureOrData,
-        tokenExpired,
-    } = useAppSelector(({ nowPlaying }) => nowPlaying);
-
-    const fetchingAllowed = pageNumber !== lastPageNumber;
-
-    const dispatch = useAppDispatch();
-
-    useEffect(() => {
-        if (tokenExpired) {
-            dispatch(loginWithRefreshToken(authData.refreshToken));
-        }
-    }, [authData.refreshToken, dispatch, tokenExpired]);
-
-    useEffect(() => {
-        if (fetchingAllowed) {
-            dispatch(fetchNowPlayingMovies(authData.token, pageNumber));
-        }
-    }, [authData.token, dispatch, fetchingAllowed, pageNumber]);
+    // PopularList and NowPlayingList are very similar, so we're using a common
+    // custom hook to help to reduce the code duplication
+    const { isFetching, movieFailureOrData, dispatch } = useMovieFetching(
+        authData,
+        useAppSelector(({ nowPlaying }) => nowPlaying),
+        fetchNowPlayingMovies,
+    );
 
     function onSelectMovie(movie: NowPlayingMovie) {
-        history.push('/movies/details', { movie, authData });
+        history.push(Paths.movieDetails, { movie, authData });
     }
 
     function onEndReached() {
@@ -59,7 +45,7 @@ const NowPlayingList: React.FC<{ authData: AuthData }> = ({ authData }) => {
             <NowPlayingItem
                 key={item.movieId.value}
                 item={item}
-                onSelectMovie={onSelectMovie}
+                onSelectItem={onSelectMovie}
             />
         );
     }
@@ -69,33 +55,16 @@ const NowPlayingList: React.FC<{ authData: AuthData }> = ({ authData }) => {
     }
 
     function listFooterComponent() {
-        return (
-            <>
-                {isFetching && (
-                    <View style={styles.loaderContainer}>
-                        <ActivityIndicator
-                            size={50}
-                            animating={true}
-                            color={colors.accent}
-                        />
-                    </View>
-                )}
-            </>
-        );
+        return <Loader color={colors.accent} visible={isFetching} />;
     }
 
     return (
         <>
             {movieFailureOrData instanceof MovieFailure ? (
-                <View style={styles.helperTextContainer}>
-                    <HelperText
-                        style={styles.helperText}
-                        type="error"
-                        visible={movieFailureOrData instanceof ServerError}
-                        padding="none">
-                        {movieFailureOrData.message}
-                    </HelperText>
-                </View>
+                <ErrorMessage
+                    visible={movieFailureOrData instanceof ServerError}
+                    message={movieFailureOrData.message}
+                />
             ) : (
                 <Carousel
                     data={movieFailureOrData}
@@ -116,22 +85,3 @@ const NowPlayingList: React.FC<{ authData: AuthData }> = ({ authData }) => {
 };
 
 export default NowPlayingList;
-
-const styles = StyleSheet.create({
-    loaderContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: 50,
-    },
-    helperTextContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    helperText: {
-        fontSize: 14,
-        fontWeight: 'bold',
-        color: Colors.white,
-    },
-});

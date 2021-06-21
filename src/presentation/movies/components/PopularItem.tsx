@@ -12,14 +12,14 @@ import { PopularMovie } from '../../../domain/movies/popular';
 
 const PopularItem: React.FC<{
     item: PopularMovie;
-    onSelectMovie: (movie: PopularMovie) => void;
-}> = ({ item, onSelectMovie }) => {
+    onSelectItem: (movie: PopularMovie) => void;
+}> = ({ item, onSelectItem }) => {
     const { colors } = useTheme();
 
     return (
         <View style={styles.converImageContainer}>
             <TouchableHighlight
-                onPress={onSelectMovie.bind(null, item)}
+                onPress={onSelectItem.bind(null, item)}
                 underlayColor={colors.accent}>
                 <Image
                     style={styles.coverImage}

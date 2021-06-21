@@ -10,13 +10,13 @@ import { NowPlayingMovie } from '../../../domain/movies/now_playing';
 
 const NowPlayingItem: React.FC<{
     item: NowPlayingMovie;
-    onSelectMovie: (movie: NowPlayingMovie) => void;
-}> = ({ item, onSelectMovie }) => {
+    onSelectItem: (movie: NowPlayingMovie) => void;
+}> = ({ item, onSelectItem }) => {
     const { colors } = useTheme();
 
     return (
         <TouchableHighlight
-            onPress={onSelectMovie.bind(null, item)}
+            onPress={onSelectItem.bind(null, item)}
             underlayColor={colors.accent}>
             <Image
                 style={styles.bannerImage}

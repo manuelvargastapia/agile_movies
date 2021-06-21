@@ -17,6 +17,9 @@ abstract class ValueObject<T> {
         return !(this.value instanceof ValueFailure);
     }
 
+    // Helper function that comes in handy when the value
+    // might be logically valid, according to context, but
+    // it's still required to "unwrap" it before using it
     getOrCrash(): T {
         if (this.value instanceof ValueFailure) {
             throw new Error('Unexpected error!');

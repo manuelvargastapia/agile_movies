@@ -3,9 +3,7 @@ import { View, Text, Image, StyleSheet, Dimensions } from 'react-native';
 import { Colors } from 'react-native-paper';
 import { Actor } from '../../../domain/movies/actor';
 
-const ActorItem: React.FC<{
-    item: Actor;
-}> = ({ item }) => {
+const ActorItem: React.FC<{ item: Actor }> = ({ item }) => {
     return (
         <View style={styles.actorPictureContainer}>
             <Image
