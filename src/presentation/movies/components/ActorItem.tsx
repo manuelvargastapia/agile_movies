@@ -23,14 +23,12 @@ export default ActorItem;
 const styles = StyleSheet.create({
     actorPictureContainer: {
         flex: 1,
-        alignItems: 'center',
         paddingBottom: 16,
-        marginHorizontal: 30,
+        marginHorizontal: 24,
         marginBottom: 0,
     },
     actorPicture: {
-        width: '100%',
-        height: Dimensions.get('screen').width * 0.5,
+        height: Dimensions.get('screen').height * 0.25,
     },
     actorName: {
         color: Colors.white,
