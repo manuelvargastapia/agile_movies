@@ -1,9 +1,9 @@
+import { IMovie } from '../../../domain/movies/i_movie';
 import { MovieFailure } from '../../../domain/movies/movie_failures';
-import { NowPlayingMovie } from '../../../domain/movies/now_playing';
 
-export interface NowPlayingState {
+export interface MoviesState {
     isFetching: boolean;
-    movieFailureOrData: MovieFailure | NowPlayingMovie[];
+    movieFailureOrData: MovieFailure | IMovie[];
     tokenExpired: boolean;
     pageNumber: number;
     lastPageNumber: number;
